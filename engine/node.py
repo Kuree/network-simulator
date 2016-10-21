@@ -2,14 +2,14 @@ import simpy
 import random
 import time
 
-class Node:
+class Node(Device):
     def __init__(self, node_id, server_id, env, sleep_time = 1):
         ''' 
             set up the basic variables used in the simulation
             sleep_time: used for every communication cycle of the node. nodes are responsible for updating the sleep time
         '''
+        super.__init__(node_id)
         self.env = env
-        self.node_id = node_id
         self.server_id = server_id
         self._message = None
         self.random = random.Random() # unique seed
