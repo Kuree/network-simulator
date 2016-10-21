@@ -15,31 +15,75 @@ class TransmissionMedium:
         self.env = env
         self.__signal = blinker.signal(medium_name)
 
+        # is_busy is useful for CSMA based protocol
+        self.__is_busy = False
+        
+        self.__active_time = 0
+
+    def __on_traffic(self, packet):
+        print(packet.time)
+
     def add_device(self, device):
         ''' this method adds a device to the transmission medium
         '''
-        self.__subscribe(device.on_receive)
-        def _transmit(payload):
-            self.__transmit(device, payload)
-        device.send = _transmit
+        self.__subscribe(device._on_receive)
+        def _transmit(payload, time):
+            self.__transmit(device, payload, time)
+        device._send = _transmit
 
     def __subscribe(self, callback):
         self.__signal.connect(callback)
 
-    def __transmit(self, device, payload):
+    def __transmit(self, device, payload, time):
         ''' called when device wants to transmit data
         '''
         self.__signal.send(TransmissionPacket(device.id, payload))
+        self.__active_time = time
 
+        # note that only one can actually transmite
+        # hence need a way to indicate intereference
+        self.__is_busy = True
+    
+    def is_busy(self):
+        return self.__is_busy
+
+    def run(self):
+        while True:
+            if self.__is_busy:
+                # might need mutx to protect it
+                yield self.env.timeout(self.__active_time)
+                self.__active_time = 0
+                self.__is_busy = False
+            else:
+                yield self.env.timeout(0.001)
+
+
+def t(env):
+    while True:
+        yield env.timeout(1)
+        print(1)
 
 if __name__ == "__main__":
     def r(obj):
         print(obj.id, obj.payload)
 
     env = simpy.Environment()
-    t = TransmissionMedium(env)
-
-    d = Device(1)
-    d.on_receive = r
-    t.add_device(d)
-    d.send("yo")
+    
+    def test(): 
+        while True:
+            t = TransmissionMedium(env)
+            env.process(t.run())
+            d = Device(1)
+            d.on_receive = r
+            t.add_device(d)
+            d._send("yo", 1)
+            yield env.timeout(1)
+            print(t.is_busy())
+            d.sleep()
+            d._send("sup", 1)
+            print(t.is_busy())
+            yield env.timeout(1)
+            print(t.is_busy())
+            break
+    env.process(test())
+    env.run(until=5)
