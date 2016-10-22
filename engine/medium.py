@@ -1,12 +1,11 @@
 import simpy
 import blinker
-from device import Device
 
 # this defines the transmission medium
 
 class TransmissionPacket:
     def __init__(self, id, payload):
-        self.env = env
+        #self.env = env
         self.payload = payload
         self.id = id
 
@@ -57,33 +56,3 @@ class TransmissionMedium:
             else:
                 yield self.env.timeout(0.001)
 
-
-def t(env):
-    while True:
-        yield env.timeout(1)
-        print(1)
-
-if __name__ == "__main__":
-    def r(obj):
-        print(obj.id, obj.payload)
-
-    env = simpy.Environment()
-    
-    def test(): 
-        while True:
-            t = TransmissionMedium(env)
-            env.process(t.run())
-            d = Device(1)
-            d.on_receive = r
-            t.add_device(d)
-            d._send("yo", 1)
-            yield env.timeout(1)
-            print(t.is_busy())
-            d.sleep()
-            d._send("sup", 1)
-            print(t.is_busy())
-            yield env.timeout(1)
-            print(t.is_busy())
-            break
-    env.process(test())
-    env.run(until=5)
