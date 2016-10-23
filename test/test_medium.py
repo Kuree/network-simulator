@@ -8,27 +8,30 @@ import simpy
 from engine import Device
 
 if __name__ == "__main__":
-    def r(obj):
-        print(obj.id, obj.payload)
+    TEST_MESSAGE1 = "TEST1"
+    TEST_MESSAGE2 = "TEST2"
+    def listen(packet):
+        assert packet.payload == TEST_MESSAGE1
 
     env = simpy.Environment()
 
     def test():
-        while True:
-            t = TransmissionMedium(env)
-            env.process(t.run())
-            d = Device(1)
-            d.on_receive = r
-            t.add_device(d)
-            d._send("yo", 1)
-            yield env.timeout(1)
-            print(t.is_busy())
-            d.sleep()
-            d._send("sup", 1)
-            print(t.is_busy())
-            yield env.timeout(1)
-            print(t.is_busy())
-            break
+        t = TransmissionMedium(env)
+        env.process(t.run())
+        d = Device(1)
+        d.on_receive = listen
+        t.add_device(d)
+        d._send(TEST_MESSAGE1, 1)
+        yield env.timeout(1)
+        assert env.now == 1
+        assert t.is_busy() == True
+        d.sleep()
+        d._send(TEST_MESSAGE2, 2)
+        yield env.timeout(1)
+        assert env.now == 2
+        #assert t.is_busy() == True
+        yield env.timeout(1)
+        assert t.is_busy() == False
     env.process(test())
-    env.run(until=5)
+    env.run(until=10)
 

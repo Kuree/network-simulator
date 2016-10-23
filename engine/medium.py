@@ -38,6 +38,7 @@ class TransmissionMedium:
         '''
         self.__signal.send(TransmissionPacket(device.id, payload))
         self.__active_time = time
+        print(payload, self.__active_time)
 
         # note that only one can actually transmite
         # hence need a way to indicate intereference
@@ -50,9 +51,11 @@ class TransmissionMedium:
         while True:
             if self.__is_busy:
                 # might need mutx to protect it
+                print("time", self.__active_time)
                 yield self.env.timeout(self.__active_time)
                 self.__active_time = 0
                 self.__is_busy = False
             else:
+                # the precision is 0.001
                 yield self.env.timeout(0.001)
 

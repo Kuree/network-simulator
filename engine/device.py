@@ -8,7 +8,6 @@ class Device:
     def _on_receive(self, packet):
         ''' this will be called any time a transmission is made to the medium
         '''
-        print("got a apcket", self.__is_active)
         if self.__is_active:
             self.on_receive(packet)
     
