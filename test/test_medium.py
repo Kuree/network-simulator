@@ -17,20 +17,20 @@ if __name__ == "__main__":
 
     def test():
         t = TransmissionMedium(env)
-        env.process(t.run())
         d = Device(1)
         d.on_receive = listen
         t.add_device(d)
         d._send(TEST_MESSAGE1, 1)
         yield env.timeout(1)
         assert env.now == 1
-        assert t.is_busy() == True
+        assert t.is_busy() == False
         d.sleep()
         d._send(TEST_MESSAGE2, 2)
         yield env.timeout(1)
         assert env.now == 2
-        #assert t.is_busy() == True
+        assert t.is_busy() == True
         yield env.timeout(1)
+        assert env.now == 3
         assert t.is_busy() == False
     env.process(test())
     env.run(until=10)

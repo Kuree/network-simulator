@@ -3,6 +3,7 @@ class Device:
     '''
     def __init__(self, id):
         self.id = id
+        self._medium = None
         self.__is_active = True
 
     def _on_receive(self, packet):
@@ -25,3 +26,8 @@ class Device:
 
     def _send(self, payload, time=1):
         pass
+
+    def is_medium_busy(self):
+        if self._medium == None:
+            return False # if there is no medium attach to the device
+        return self._medium.is_busy()
