@@ -7,7 +7,8 @@ class TraceFormatter(logging.Formatter):
 
     def format(self, record):
         packet = record.msg
+        timestamp = packet.timestamp
         id = packet.id
         size    = packet.size
         valid = 1 if not packet.is_corrupted else 0
-        return "{0} {1} {2} {3}".format(self.env.now, id, size, valid)
+        return "{0} {1} {2} {3}".format(timestamp, id, size, valid)

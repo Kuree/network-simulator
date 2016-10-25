@@ -76,7 +76,6 @@ class TransmissionMedium:
             self.logger.debug(self.__current_packet)
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
-        if not packet.is_corrupted:
-            self.logger.debug(packet)
+        self.logger.debug(packet)
 
 
