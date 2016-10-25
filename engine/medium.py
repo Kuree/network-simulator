@@ -6,13 +6,14 @@ import sys
 
 
 class TransmissionPacket:
-    def __init__(self, timestamp, id, payload, duration, rate = 1):
+    def __init__(self, timestamp, id, payload, duration, rate = 1, valid = True, is_overhead = False):
         #self.env = env
         self.timestamp = timestamp
         self.payload = payload
         self.id = id
         self.duration = duration
-        self.is_corrupted = False
+        self.valid = True
+        self.is_overhead = is_overhead
 
         self.size = duration * rate
 
@@ -40,11 +41,6 @@ class TransmissionMedium:
         ch.setFormatter(TraceFormatter(env))
         self.logger.addHandler(ch)
 
-        fh = logging.FileHandler("log")
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(TraceFormatter(env))
-        self.logger.addHandler(fh)
-
     def add_device(self, device):
         ''' this method adds a device to the transmission medium
         '''
@@ -71,8 +67,8 @@ class TransmissionMedium:
     def _listen_busy(self, packet):
         duration = packet.duration
         if self.__free_time - TransmissionMedium.PACKET_END > self.env.now:
-            self.__current_packet.is_corrupted = True
-            packet.is_corrupted = True
+            self.__current_packet.valid = False
+            packet.valid = False
             self.logger.debug(self.__current_packet)
         self.__free_time = self.env.now + duration
         self.__current_packet = packet

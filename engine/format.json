@@ -1,0 +1,32 @@
+[
+  {
+    "name": "timestamp",
+    "index": 0,
+    "help": "the timestamp when packet is sent",
+    "type": "float"
+  },
+{
+    "name": "id",
+    "index": 1,
+    "help": "the node id that sends the packet",
+    "type": "int"
+  },
+  {
+    "name": "size",
+    "index": 2,
+    "help": "the size of the packet. used to compute throughput",
+    "type": "int"
+  },
+  {
+    "name": "valid",
+    "index": 3,
+    "help": "if not set, the packet is corrupted",
+    "type": "int"
+  },
+  {
+    "name": "is_overhead",
+    "index": 4,
+    "help": "if set, the packet will not count as throughput",
+    "type": "int"
+  }
+]
