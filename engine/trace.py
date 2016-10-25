@@ -2,12 +2,12 @@ import logging
 
 class TraceFormatter(logging.Formatter):
     def __init__(self, env):
-        super.__init__()
-        selv.env = env
-
+        self.env = env
+        super(TraceFormatter, self).__init__()
 
     def format(self, record):
-        id = record.id
-        size    = record.size
-        valid = 1 if not record.is_corrupted else 0
+        packet = record.msg
+        id = packet.id
+        size    = packet.size
+        valid = 1 if not packet.is_corrupted else 0
         return "{0} {1} {2} {3}".format(self.env.now, id, size, valid)

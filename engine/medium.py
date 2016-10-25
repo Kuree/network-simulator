@@ -2,6 +2,8 @@ import simpy
 import blinker
 from .trace import TraceFormatter
 import logging
+import sys
+
 
 class TransmissionPacket:
     def __init__(self, timestamp, id, payload, duration, rate = 1):
@@ -16,6 +18,7 @@ class TransmissionPacket:
 
 class TransmissionMedium:
     PACKET_END = 0.001
+    
     def __init__(self, env, medium_name = "signal"):
         self.env = env
         self.__signal = blinker.signal(medium_name)
@@ -31,10 +34,16 @@ class TransmissionMedium:
 
 
         # setup logging
-        self.logger = logging.getLogger()
-        # TODO: fix this
-        for handler in self.logger.root.handlers:
-            handler.setFormatter(TraceFormatter())
+        self.logger = logging.getLogger(medium_name)
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(TraceFormatter(env))
+        self.logger.addHandler(ch)
+
+        fh = logging.FileHandler("log")
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(TraceFormatter(env))
+        self.logger.addHandler(fh)
 
     def add_device(self, device):
         ''' this method adds a device to the transmission medium
@@ -64,10 +73,10 @@ class TransmissionMedium:
         if self.__free_time - TransmissionMedium.PACKET_END > self.env.now:
             self.__current_packet.is_corrupted = True
             packet.is_corrupted = True
-            self.logger.info(self.__current_packet)
-        else:
-            self.logger.info(self.__current_packet)
+            self.logger.debug(self.__current_packet)
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
+        if not packet.is_corrupted:
+            self.logger.debug(packet)
 
 

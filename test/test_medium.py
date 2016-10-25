@@ -6,6 +6,7 @@ if __name__ == '__main__' and __package__ is None:
 from engine import TransmissionMedium
 import simpy
 from engine import Device
+import logging
 
 if __name__ == "__main__":
     TEST_MESSAGE1 = "TEST1"
@@ -16,6 +17,12 @@ if __name__ == "__main__":
     env = simpy.Environment()
 
     def test():
+        logger = logging.getLogger("signal")
+        logger.setLevel(logging.DEBUG)
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.ERROR)
+        #logger.addHandler(ch)
+        #logger.debug("test")
         t = TransmissionMedium(env)
         d1 = Device(1)
         d2 = Device(2)
