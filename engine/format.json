@@ -18,10 +18,10 @@
     "type": "int"
   },
   {
-    "name": "valid",
+    "name": "duration",
     "index": 3,
-    "help": "if not set, the packet is corrupted",
-    "type": "int"
+    "help": "the duration of the packet. used to compute throughput",
+    "type": "float"
   },
   {
     "name": "is_overhead",

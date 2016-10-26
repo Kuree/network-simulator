@@ -12,7 +12,6 @@ class TransmissionPacket:
         self.payload = payload
         self.id = id
         self.duration = duration
-        self.valid = True
         self.is_overhead = is_overhead
 
         self.size = duration * rate
@@ -66,10 +65,6 @@ class TransmissionMedium:
 
     def _listen_busy(self, packet):
         duration = packet.duration
-        if self.__free_time - TransmissionMedium.PACKET_END > self.env.now:
-            self.__current_packet.valid = False
-            packet.valid = False
-            self.logger.debug(self.__current_packet)
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
         self.logger.debug(packet)
