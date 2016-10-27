@@ -3,7 +3,7 @@ class Device:
     '''
     def __init__(self, id):
         self.id = id
-        self._medium = None
+        self._medium = []
         self.__is_active = True
 
     def _on_receive(self, packet):
@@ -24,10 +24,12 @@ class Device:
     def on_receive(self, packet):
         pass
 
-    def _send(self, payload, time=1):
-        pass
+    def _send(self, payload, time=1, medium_index = 0):
+        if len(self._medium) == 0:
+            raise Exception("Device has no medium attached")
+        self._medium[medium_index][1](payload, time)
 
-    def is_medium_busy(self):
-        if self._medium == None:
+    def is_medium_busy(self, medium_index = 0):
+        if len(self._medium) == 0:
             return False # if there is no medium attach to the device
-        return self._medium.is_busy()
+        return self._medium[medium_index][0].is_busy()

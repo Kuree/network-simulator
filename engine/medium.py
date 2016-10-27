@@ -13,11 +13,11 @@ class TransmissionPacket:
         self.id = id
         self.duration = duration
         self.is_overhead = is_overhead
-
+        self.valid = valid
         self.size = duration * rate
 
 class TransmissionMedium:
-    PACKET_END = 0.001
+    PRECISION = 0.001
     
     def __init__(self, env, medium_name = "signal"):
         self.env = env
@@ -46,9 +46,7 @@ class TransmissionMedium:
         self.__subscribe(device._on_receive)
         def _transmit(payload, time):
             self.__transmit(device, payload, time)
-        device._send = _transmit
-
-        device._medium = self
+        device._medium.append((self, _transmit))
 
     def __subscribe(self, callback):
         self.__signal.connect(callback)
@@ -61,7 +59,7 @@ class TransmissionMedium:
     
     def is_busy(self):
         # TODO: fix the packet end
-        return self.env.now <= self.__free_time - TransmissionMedium.PACKET_END
+        return self.env.now <= self.__free_time - TransmissionMedium.PRECISION
 
     def _listen_busy(self, packet):
         duration = packet.duration
