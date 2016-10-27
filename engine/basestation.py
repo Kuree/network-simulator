@@ -31,11 +31,11 @@ class BaseStation(Device):
         self._busy_time = max(self._busy_time, timestamp + duration)
 
         # add to event queue
-        self.env.process(self.wait_to_process(self, packet))
+        self.env.process(self.wait_to_process(packet))
        
     def wait_to_process(self, packet):
         # pretending receiving the transmission
-        time_to_sleep = packet.timestamp + duration - self.env.now
+        time_to_sleep = packet.timestamp + packet.duration - self.env.now
         yield self.env.timeout(time_to_sleep)
         if packet.valid:
             self.process(packet)
