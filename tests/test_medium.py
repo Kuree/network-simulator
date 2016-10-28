@@ -28,17 +28,14 @@ if __name__ == "__main__":
         t.add_device(d2)
         # this one should be successful
         d1._send(TEST_MESSAGE1, 1)
-        yield env.timeout(1)
-        assert env.now == 1
+        yield env.timeout(1.1)
         assert t.is_busy() == False
         d1.sleep()
         # this should be sucessful as well
         d1._send(TEST_MESSAGE2, 2)
-        yield env.timeout(1)
-        assert env.now == 2
+        yield env.timeout(1.1)
         assert t.is_busy() == True
-        yield env.timeout(1)
-        assert env.now == 3
+        yield env.timeout(1.1)
         assert t.is_busy() == False
         # collision
         d1._send(TEST_MESSAGE1, 2)
@@ -47,9 +44,8 @@ if __name__ == "__main__":
         # collision
         d2._send(TEST_MESSAGE1, 2)
         yield env.timeout(1)
-        assert env.now == 5
         assert t.is_busy() == True
-        yield env.timeout(1)
+        yield env.timeout(1.1)
         assert t.is_busy() == False
     env.process(test())
     env.run(until=10)

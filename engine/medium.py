@@ -6,7 +6,7 @@ import sys
 
 
 class TransmissionPacket:
-    def __init__(self, timestamp, id, payload, duration, rate = 1, valid = True, is_overhead = False):
+    def __init__(self, timestamp, id, payload, duration, size = 1, valid = True, is_overhead = False):
         #self.env = env
         self.timestamp = timestamp
         self.payload = payload
@@ -14,7 +14,7 @@ class TransmissionPacket:
         self.duration = duration
         self.is_overhead = is_overhead
         self.valid = valid
-        self.size = duration * rate
+        self.size = size
 
 class TransmissionMedium:
     PRECISION = 0.001
@@ -44,17 +44,19 @@ class TransmissionMedium:
         ''' this method adds a device to the transmission medium
         '''
         self.__subscribe(device._on_receive)
-        def _transmit(payload, time):
-            self.__transmit(device, payload, time)
+        def _transmit(payload, duration, size):
+            self.__transmit(device, payload, duration, size)
         device._medium.append((self, _transmit))
 
     def __subscribe(self, callback):
         self.__signal.connect(callback)
 
-    def __transmit(self, device, payload, time):
+    def __transmit(self, device, payload, duration, size):
         ''' called when device wants to transmit data
         '''
-        self.__signal.send(TransmissionPacket(self.env.now, device.id, payload, time))
+        jitter = device.jitter()
+        timestamp = self.env.now + jitter
+        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size))
         
     
     def is_busy(self):

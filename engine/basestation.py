@@ -9,7 +9,6 @@ class BaseStation(Device):
         self.__current_packet = None
         super().__init__(id)
          
-        self.env.process(self.run())
 
     def on_receive(self, packet):
         # this needs to resolve several problem
