@@ -56,6 +56,8 @@ class TransmissionMedium:
         '''
         jitter = device.jitter()
         timestamp = self.env.now + jitter
+        if timestamp < 0:
+            timestamp = abs(jitter)
         self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size))
         
     

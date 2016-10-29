@@ -31,9 +31,10 @@ class Device:
     def jitter(self):
         ''' return the random jitter for the device
         '''
-        return (self.random.random() - 0.5) * self.jitter_range
+        jitter = (self.random.random() - 0.5) * self.jitter_range
+        return jitter
 
-    def _send(self, payload, duration=1, size = 1, medium_index = 0):
+    def send(self, payload, duration=1, size = 1, medium_index = 0):
         if len(self._medium) == 0:
             raise Exception("Device has no medium attached")
         self._medium[medium_index][1](payload, duration, size)

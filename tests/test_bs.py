@@ -18,12 +18,12 @@ def test(env):
     t.add_device(bs)
     t.add_device(d1)
     t.add_device(d2)
-    d1._send(MESSAGE1, 1)
+    d1.send(MESSAGE1, 1)
     yield env.timeout(1.1)
     # both message should be dropped
-    d2._send(MESSAGE2, 2)
+    d2.send(MESSAGE2, 2)
     yield env.timeout(1.1)
-    d1._send(MESSAGE2)
+    d1.send(MESSAGE2)
     assert t.is_busy() == True
 
 
