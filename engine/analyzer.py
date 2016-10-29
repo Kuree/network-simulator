@@ -39,7 +39,6 @@ class Analyzer:
 
             if timestamp < busy_time:
                 # this is a collision
-                busy_time = max(timestamp + duration, busy_time) # compute the next busy_time
                 packet.append(True) # this packet should be dropped
                 # we also nned to back trace the previous one
                 if packet_index > 0:
@@ -48,12 +47,12 @@ class Analyzer:
             else:
                 # we are good for this one so far...
                 packet.append(False)
-                busy_time = timestamp + duration
+            busy_time = max(timestamp + duration, busy_time) # compute the next busy_time
         return busy_time
 
     def compute_stats(self):
         total_time = self.process_raw(self.packet_data)
-        throughput = sum([packet[2] for packet in self.packet_data if packet[-1]]) / total_time
+        throughput = sum([packet[2] for packet in self.packet_data if not packet[-1]]) / total_time
 
         return total_time, throughput
 
