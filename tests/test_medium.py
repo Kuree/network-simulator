@@ -21,8 +21,8 @@ if __name__ == "__main__":
         #logger.addHandler(ch)
         #logger.debug("test")
         t = TransmissionMedium(env)
-        d1 = Device(1)
-        d2 = Device(2)
+        d1 = Device(1, env)
+        d2 = Device(2, env)
         d1.on_receive = listen
         t.add_device(d1)
         t.add_device(d2)

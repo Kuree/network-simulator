@@ -7,16 +7,15 @@ class TDMANode(Device):
         ''' schedule time is when the node should transmit
             it is computed by now % tatal == scheduled_time
         '''
-        super().__init__(id, seed=seed, jitter_range = jitter_range)
+        super().__init__(id, env, seed=seed, jitter_range = jitter_range)
         self.scheduled_time = scheduled_time
         self.total = total
-        self.env = env
         self.transmission_time = transmission_time
         self.env.process(self.run())
 
 
     def run(self):
-        dummpy_payload = "1"
+        dummpy_payload = "TDMA"
         duration = self.transmission_time # to avoid jitter
         while True:
             if self.env.now % self.total == self.scheduled_time:

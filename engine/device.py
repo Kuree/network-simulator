@@ -3,8 +3,9 @@ import random
 class Device:
     ''' the base class for simulation node
     '''
-    def __init__(self, id, seed = 1, jitter_range = 0.1):
+    def __init__(self, id, env, seed = 1, jitter_range = 0.1):
         self.id = id
+        self.env = env
         self.random = random.Random(seed)
         self._medium = []
         self.__is_active = True
@@ -39,7 +40,13 @@ class Device:
             raise Exception("Device has no medium attached")
         self._medium[medium_index][1](payload, duration, size)
 
+    def delay(self):
+        # TODO: set the delay parameter
+        delay_time = self.random.random() * 0.1
+        yield self.env.timeout(delay_time)
+
     def is_medium_busy(self, medium_index = 0):
+        self.env.process(self.delay())
         if len(self._medium) == 0:
             return False # if there is no medium attach to the device
         return self._medium[medium_index][0].is_busy()
