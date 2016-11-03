@@ -35,10 +35,10 @@ class Device:
         jitter = (self.random.random() - 0.5) * self.jitter_range
         return jitter
 
-    def send(self, payload, duration=1, size = 1, medium_index = 0):
+    def send(self, payload, duration=1, size = 1, medium_index = 0, is_overhead = False):
         if len(self._medium) == 0:
             raise Exception("Device has no medium attached")
-        self._medium[medium_index][1](payload, duration, size)
+        self._medium[medium_index][1](payload, duration, size, is_overhead)
 
     def delay(self):
         # TODO: set the delay parameter

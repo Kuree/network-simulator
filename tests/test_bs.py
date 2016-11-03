@@ -11,8 +11,8 @@ def test(env):
         assert packet.payload == MESSAGE1
     bs = BaseStation(env = env, id =1)
     bs.process = process # simply way to override the method
-    d1 = Device(2)
-    d2 = Device(3)
+    d1 = Device(2, env)
+    d2 = Device(3, env)
     t = TransmissionMedium(env)
 
     t.add_device(bs)

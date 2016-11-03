@@ -44,21 +44,21 @@ class TransmissionMedium:
         ''' this method adds a device to the transmission medium
         '''
         self.__subscribe(device._on_receive)
-        def _transmit(payload, duration, size):
-            self.__transmit(device, payload, duration, size)
+        def _transmit(payload, duration, size, is_overhead):
+            self.__transmit(device, payload, duration, size, is_overhead)
         device._medium.append((self, _transmit))
 
     def __subscribe(self, callback):
         self.__signal.connect(callback)
 
-    def __transmit(self, device, payload, duration, size):
+    def __transmit(self, device, payload, duration, size, is_overhead):
         ''' called when device wants to transmit data
         '''
         jitter = device.jitter()
         timestamp = self.env.now + jitter
         if timestamp < 0:
             timestamp = abs(jitter)
-        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size))
+        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size, is_overhead=is_overhead))
         
     
     def is_busy(self):
