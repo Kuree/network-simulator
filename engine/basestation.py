@@ -1,13 +1,13 @@
 from . import Device
 
 class BaseStation(Device):
-    def __init__(self, id, env):
+    def __init__(self, id, env, seed = 0, jitter_range = 0):
         self.env = env
 
         self.PRECISION = 0.001
         self._busy_time = self.env.now
         self.__current_packet = None
-        super().__init__(id)
+        super().__init__(id, env, seed=seed, jitter_range = jitter_range)
          
 
     def on_receive(self, packet):

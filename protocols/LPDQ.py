@@ -42,7 +42,7 @@ class LPDQNode(Device):
         # smooth out the start up process
         self.sleep_time = self.random.randint(0, 20)   # TODO: change this to parameter
         
-        self..chosen_slot = 0
+        self.chosen_slot = 0
         
         self.state = LPDQNode.IDLE
 
@@ -99,7 +99,7 @@ class LPDQNode(Device):
                 self.state = LPDQ.IN_TRANSMISSION
 
 
-class LPDQServer(device):
+class LPDQBaseStation(BaseStation):
     def __init__(self, id, env, seed, m, rate, jitter_range, feedback_t, slot_t):
         super().__init__(id, env, seed = seed, jitter_range = jitter_range)
         self.m = m
@@ -115,7 +115,7 @@ class LPDQServer(device):
         self.env.process(self.run())
 
 
-    def on_receive(self, packet):
+    def process(self, packet):
         payload = packet.payload
         if type(payload) == DQRequest:
             # only interested in slot request
