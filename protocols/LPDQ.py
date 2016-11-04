@@ -27,6 +27,7 @@ class LPDQNode(Device):
     IN_TRANSMISSION = 1
     DTQ  = 2
     CRQ  = 3
+    WAIT = 4
 
     def __init__(self, id, env, seed, jitter_range, rate, m, packet_rate, slot_t, feedback_t):
         super().__init__(id, env, seed=seed, jitter_range=jitter_range)
@@ -51,7 +52,7 @@ class LPDQNode(Device):
         self.env.process(self.run())
 
     def on_receive(self, packet):
-        if self.state == LPDQNode.IN_TRANSMISSION:
+        if self.state == LPDQNode.WAIT:
             payload = packet.payload
             if type(payload) != DQFeedback:
                 return # not valid packet
@@ -80,7 +81,7 @@ class LPDQNode(Device):
                 # decide whether to transmit the packet
                 if self.random.random() < self.packet_rate: # needs to transmit
                     self.state = LPDQNode.IN_TRANSMISSION
-                    self.sleep_time = 0
+                    self.sleep_time = 1 - (self.env.now % 1)
             elif self.state == LPDQNode.IN_TRANSMISSION:
                 self.chosen_slot = self.random.randrange(self.m)
                 # compute the offset for slot
@@ -93,12 +94,14 @@ class LPDQNode(Device):
 
                 # this will put it to sleep till contention result is out
                 # TODO: fix this ugly approach
+                self.state = LPDQNode.WAIT
                 yield self.env.timeout(1 - (self.env.now % 1))
+                
             elif self.state == LPDQNode.DTQ:
                 # skip the slot time
                 yield self.env.timeout(self.slot_t)
                 # send dummpy payload
-                duration = 1 - self.slot_t - self.feedback_t
+                duration = 1 - self.slot_t - self.feedback_t - self.window_size
                 # send data in data slot
                 # TODO: fix the rate here
                 size = duration * self.rate[0]
@@ -150,6 +153,7 @@ class LPDQBaseStation(BaseStation):
         # dump to feedback slot
         yield self.env.timeout(1 - self.slot_t)
         while True:
+            print("sending slots", self.slots)
             self.send(DQFeedback(self.slots, self.dtq, self.crq), duration = self.feedback_t - self.window_size, is_overhead = True)
 
             # increment the counter accordingly
