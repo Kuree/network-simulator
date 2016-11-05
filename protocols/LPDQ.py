@@ -73,6 +73,10 @@ class LPDQNode(Device):
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
 
+    def send(self, payload, size, medium_index = 0):
+        # need to implement this part
+        pass
+
 
     def run(self):
         while True:
@@ -130,7 +134,7 @@ class LPDQBaseStation(Device):
         self.env.process(self.run())
 
 
-    def process(self, packet):
+    def on_receive(self, packet):
         payload = packet.payload
         if type(payload) == DQRequest:
             # only interested in slot request

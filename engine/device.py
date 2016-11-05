@@ -73,6 +73,12 @@ class Device:
             raise Exception("Device has no medium attached")
         self._medium[medium_index][1](payload, duration, size, is_overhead)
 
+    def send(self, payload, size, medium_index = 0):
+        ''' all the protocols should override this method to provide unified interface
+            to application layer
+        '''
+        pass
+
     def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
         time_diff = timestamp - self.env.now
         if time_diff < 0: 
