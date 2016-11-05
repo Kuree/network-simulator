@@ -1,6 +1,4 @@
-#import bootstrap
-
-from engine import Device, BaseStation, TransmissionMedium
+from engine import Device 
 
 class TDMANode(Device):
     def __init__(self, id, scheduled_time, total, env, seed, jitter_range, transmission_time):
@@ -13,17 +11,13 @@ class TDMANode(Device):
         self.transmission_time = transmission_time
         self.env.process(self.run())
 
-
-    def run(self):
-        dummpy_payload = "TDMA"
+    def send(self, payload, size, medium_index = 0):
         duration = self.transmission_time # to avoid jitter
-        while True:
-            if self.env.now % self.total == self.scheduled_time:
-                self.send(dummpy_payload, duration=duration)
-            yield self.env.timeout(1)
+        next_basetime = self.env.now - (self.env.now % self.total) + self.total
+        scheduled_time = next_basetime + self.scheduled_time
+        self._schedule_send(scheduled_time, payload, duration, size)
 
-
-class TDMABaseStation(BaseStation):
+class TDMABaseStation(Device):
     def __init__(self, id, env):
         super().__init__(id, env)
 

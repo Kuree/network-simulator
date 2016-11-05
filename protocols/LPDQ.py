@@ -1,6 +1,6 @@
 import bootstrap
 
-from engine import Device, BaseStation
+from engine import Device
 
 class DQObject:
     REQUEST = 0
@@ -113,7 +113,7 @@ class LPDQNode(Device):
                 self.state = LPDQNode.IN_TRANSMISSION
 
 
-class LPDQBaseStation(BaseStation):
+class LPDQBaseStation(Device):
     def __init__(self, id, env, seed, m, rate, jitter_range, feedback_t, slot_t):
         super().__init__(id, env, seed = seed, jitter_range = jitter_range)
         self.m = m

@@ -1,4 +1,4 @@
-from engine import Device, BaseStation
+from engine import Device
 
 class CSMANode(Device):
     def __init__(self, id, env, p, seed, jitter_range, transmission_time):
@@ -8,21 +8,20 @@ class CSMANode(Device):
         self.PRECISION = 0.05
         self.env.process(self.run()) 
 
-    def run(self):
-        yield self.env.timeout(self.random.random() * 10)
-        dummy_payload = "CSMA"
+    def send(self, payload, size, medium_index = 0):
         duration = self.transmission_time
-        while True:
+        sent = False
+        while not sent:
             prob = self.random.random() < self.p
             if not self.is_medium_busy() and prob:
                 yield self.env.timeout(self.random.random() * self.PRECISION) # DELAY
                 self.send(dummy_payload, duration = duration)
-                yield self.env.timeout(duration)
+                sent = True
             else:
                 yield self.env.timeout(self.random.random() * self.PRECISION)
 
 
-class CSMABaseStation(BaseStation):
+class CSMABaseStation(Device):
     def __init__(self, id, env):
         super().__init__(id, env)
 
