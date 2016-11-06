@@ -41,6 +41,7 @@ class LPDQNode(Device):
         self.feedback_t = feedback_t
 
         self.window_size = 0.001
+        self.PRECESION = 0.001
 
         # smooth out the start up process
         self.sleep_time = self.random.randint(0, 20)   # TODO: change this to parameter
@@ -57,7 +58,7 @@ class LPDQNode(Device):
             if type(payload) != DQFeedback:
                 return # not valid packet
             if payload.slots[self.chosen_slot] == 1: # it's a successful request
-                print("received slots", payload.slots)
+                # print("received slots", payload.slots)
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] == 1:
@@ -78,9 +79,11 @@ class LPDQNode(Device):
         pass
 
 
-    def run(self):
-        while True:
-            yield self.env.timeout(self.sleep_time)
+    def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
+        while self.state != LPDQNode.IDLE:
+            yield self.env.timeout(self.PRECISION) # need to wait till the current transmission is finished
+        sent = False
+        while not sent:
             if self.state == LPDQNode.IDLE:
                 # decide whether to transmit the packet
                 if self.random.random() < self.packet_rate: # needs to transmit

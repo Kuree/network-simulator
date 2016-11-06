@@ -13,7 +13,7 @@ class TDMANode(Device):
 
     def send(self, payload, size, medium_index = 0):
         duration = self.transmission_time # to avoid jitter
-        next_basetime = self.env.now - (self.env.now % self.total) + self.total
+        next_basetime = self.env.now - (self.env.now % self.total) + self.total * self._get_queue_len()
         scheduled_time = next_basetime + self.scheduled_time
         self._schedule_send(scheduled_time, payload, duration, size)
 

@@ -23,7 +23,7 @@ class CSMANode(Device):
 
     def send(self, payload, size, medium_index = 0):
         duration = self.transmission_time
-        self._schedule_send(0, payload, duration, size, medium_index, 0)
+        self.env.process(self._schedule_send(0, payload, duration, size, medium_index, 0))
         
 class CSMABaseStation(Device):
     def __init__(self, id, env):

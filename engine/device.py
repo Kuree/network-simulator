@@ -79,11 +79,14 @@ class Device:
         '''
         pass
 
+    def _get_queue_len(self):
+        return len(self.__transmission_queue)
+
     def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
         time_diff = timestamp - self.env.now
         if time_diff < 0: 
             raise Exception("scheduled transmission time cannot be the past time!")
-        self.__transmission_queue.put((time_diff, payload, duration, size, medium_index, is_overhead))
+        self.__transmission_queue.put((timestamp, payload, duration, size, medium_index, is_overhead))
 
 
     def __scheduler(self):
@@ -92,7 +95,7 @@ class Device:
                 yield self.env.timeout(Device.PRECISION)
             else:
                 args = self.__transmission_queue.get()
-                sleep_time = args[0]
+                sleep_time = args[0] - self.env.now
                 yield self.env.timeout(sleep_time)
                 args = args[1:0]
                 self._send(*args)
