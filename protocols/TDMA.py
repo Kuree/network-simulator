@@ -11,11 +11,14 @@ class TDMANode(Device):
         self.transmission_time = transmission_time
         self.env.process(self.run())
 
-    def send(self, payload, size, medium_index = 0):
+    def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         duration = self.transmission_time # to avoid jitter
-        next_basetime = self.env.now - (self.env.now % self.total) + self.total * self._get_queue_len()
+        next_basetime = self.env.now - (self.env.now % self.total) + self.total
         scheduled_time = next_basetime + self.scheduled_time
-        self._schedule_send(scheduled_time, payload, duration, size)
+        sleep_time = scheduled_time - self.env.now
+        yield self.env.timeout(sleep_time)
+        self._send(payload, duration, size, medium_index, is_overhead)
+
 
 class TDMABaseStation(Device):
     def __init__(self, id, env):

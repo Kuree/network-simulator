@@ -8,8 +8,7 @@ class CSMANode(Device):
         self.PRECISION = 0.05
         self.env.process(self.run()) 
 
-    def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
-        # for csma timestamp is not needed
+    def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         sent = False
         while not sent:
             prob = self.random.random() < self.p
@@ -20,10 +19,6 @@ class CSMANode(Device):
             else:
                 yield self.env.timeout(self.random.random() * self.PRECISION)
 
-
-    def send(self, payload, size, medium_index = 0):
-        duration = self.transmission_time
-        self.env.process(self._schedule_send(0, payload, duration, size, medium_index, 0))
         
 class CSMABaseStation(Device):
     def __init__(self, id, env):

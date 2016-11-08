@@ -74,19 +74,16 @@ class Device:
         self._medium[medium_index][1](payload, duration, size, is_overhead)
 
     def send(self, payload, size, medium_index = 0):
-        ''' all the protocols should override this method to provide unified interface
-            to application layer
-        '''
-        pass
+        # TODO: fix rate
+        duration = size / self.rates[0]
+        self.__transmission_queue.put((payload, duration, size, medium_index, False))
 
     def _get_queue_len(self):
         return len(self.__transmission_queue)
 
-    def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
-        time_diff = timestamp - self.env.now
-        if time_diff < 0: 
-            raise Exception("scheduled transmission time cannot be the past time!")
-        self.__transmission_queue.put((timestamp, payload, duration, size, medium_index, is_overhead))
+    def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
+        # need to override this method for every protocol
+        yield self.env.timeout(0)
 
 
     def __scheduler(self):
@@ -95,11 +92,7 @@ class Device:
                 yield self.env.timeout(Device.PRECISION)
             else:
                 args = self.__transmission_queue.get()
-                sleep_time = args[0] - self.env.now
-                yield self.env.timeout(sleep_time)
-                args = args[1:0]
-                self._send(*args)
-
+                self.env.process(self._schedule_send(*args))
 
     def delay(self):
         # TODO: set the delay parameter

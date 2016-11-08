@@ -74,29 +74,21 @@ class LPDQNode(Device):
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
 
-    def send(self, payload, size, medium_index = 0):
-        # need to implement this part
-        pass
 
-
-    def _schedule_send(self, timestamp, payload, duration, size, medium_index, is_overhead):
-        while self.state != LPDQNode.IDLE:
-            yield self.env.timeout(self.PRECISION) # need to wait till the current transmission is finished
+    def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         sent = False
+        self.state = LPDQNode.IN_TRANSMISSION
+        self.sleep_time = 1 - (self.env.now % 1)
         while not sent:
-            if self.state == LPDQNode.IDLE:
-                # decide whether to transmit the packet
-                if self.random.random() < self.packet_rate: # needs to transmit
-                    self.state = LPDQNode.IN_TRANSMISSION
-                    self.sleep_time = 1 - (self.env.now % 1)
-            elif self.state == LPDQNode.IN_TRANSMISSION:
+            yield self.env.timeout(self.sleep_time)
+            if self.state == LPDQNode.IN_TRANSMISSION:
                 self.chosen_slot = self.random.randrange(self.m)
                 # compute the offset for slot
                 # sleep_time
                 sleep_time = self.slot_t / self.m * self.chosen_slot
                 print("slot", self.chosen_slot, "sleep time", sleep_time)
                 yield self.env.timeout(sleep_time)
-                self.send(DQRequest(self.chosen_slot), duration = self.slot_t / self.m - self.window_size, is_overhead = True)
+                self._send(DQRequest(self.chosen_slot), duration = self.slot_t / self.m - self.window_size, is_overhead = True)
                 
 
                 # this will put it to sleep till contention result is out
@@ -112,11 +104,12 @@ class LPDQNode(Device):
                 # send data in data slot
                 # TODO: fix the rate here
                 size = duration * self.rate[0]
-                self.send(1, duration = duration, size=size)
+                self._send(1, duration = duration, size=size)
                 self.state = LPDQNode.IDLE
+                sent = True
             elif self.state == LPDQNode.CRQ:
                 # try to transmit again
-                self.sleep_time = 0
+                self.sleep_time = 1 - (self.env.now % 1)
                 self.state = LPDQNode.IN_TRANSMISSION
 
 
