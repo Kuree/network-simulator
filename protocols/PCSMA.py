@@ -6,7 +6,6 @@ class CSMANode(Device):
         self.p = p
         self.transmission_time = transmission_time
         self.PRECISION = 0.05
-        self.env.process(self.run()) 
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         sent = False

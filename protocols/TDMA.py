@@ -9,7 +9,6 @@ class TDMANode(Device):
         self.scheduled_time = scheduled_time
         self.total = total
         self.transmission_time = transmission_time
-        self.env.process(self.run())
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         duration = self.transmission_time # to avoid jitter

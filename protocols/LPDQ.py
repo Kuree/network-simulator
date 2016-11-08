@@ -29,12 +29,11 @@ class LPDQNode(Device):
     CRQ  = 3
     WAIT = 4
 
-    def __init__(self, id, env, seed, jitter_range, rate, m, packet_rate, slot_t, feedback_t):
+    def __init__(self, id, env, seed, jitter_range, rate, m, slot_t, feedback_t):
         super().__init__(id, env, seed=seed, jitter_range=jitter_range)
         self.rate = rate
         #self.average_packet_size = average_packet_size
         self.m = m
-        self.packet_rate = packet_rate
         self.rate = rate
         # this controls the time for overhead
         self.slot_t = slot_t
@@ -49,8 +48,6 @@ class LPDQNode(Device):
         self.chosen_slot = 0
         
         self.state = LPDQNode.IDLE
-
-        self.env.process(self.run())
 
     def on_receive(self, packet):
         if self.state == LPDQNode.WAIT:

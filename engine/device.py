@@ -87,7 +87,7 @@ class Device:
 
 
     def __scheduler(self):
-        while True
+        while True:
             if self.__transmission_queue.empty():
                 yield self.env.timeout(Device.PRECISION)
             else:
