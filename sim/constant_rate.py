@@ -24,19 +24,21 @@ def main():
     
     t = TransmissionMedium(env, medium_name)
     # setting up logger    
-    logger = logging.getLogger(medium_name)
     ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
+    t.add_logger(medium_name)
+    logger = logging.getLogger(medium_name)
+    ch.setLevel(logging.INFO)
     ch.setFormatter(TraceFormatter(env))
     logger.addHandler(ch)
-    t.add_logger(logger)
 
     total_time = args.sim_time
     use_seed = args.use_seed
     num_nodes = args.num_nodes
     protocol_type = args.type
+   
+    special_args = {"seed": 0}
     
-    bs = create_basestation(protocol_type, 0, env, "default.json")
+    bs = create_basestation(protocol_type, 0, env, "default.json", special_args)
     t.add_device(bs)
     nodes_list = []
 

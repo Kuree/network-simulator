@@ -81,9 +81,11 @@ class LPDQNode(Device):
                 # compute the offset for slot
                 # sleep_time
                 sleep_time = self.slot_t / self.m * self.chosen_slot
-                print("slot", self.chosen_slot, "sleep time", sleep_time)
+                #print("slot", self.chosen_slot, "sleep time", sleep_time)
                 yield self.env.timeout(sleep_time)
-                self._send(DQRequest(self.chosen_slot), duration = self.slot_t / self.m - self.window_size, is_overhead = True)
+                duration = self.slot_t / self.m - self.window_size
+                size = duration * self.rates[0]
+                self._send(DQRequest(self.chosen_slot), duration, size, 0, is_overhead = True)
                 
 
                 # this will put it to sleep till contention result is out
@@ -99,7 +101,7 @@ class LPDQNode(Device):
                 # send data in data slot
                 # TODO: fix the rate here
                 #size = duration * self.rate[0]
-                self._send(1, duration = duration, size=size)
+                self._send(payload, duration = duration, size=size, medium_index = 0, is_overhead = False)
                 self.state = LPDQNode.IDLE
                 sent = True
             elif self.state == LPDQNode.CRQ:
@@ -132,7 +134,7 @@ class LPDQBaseStation(Device):
             if slot_raw < 0:
                 slot_raw = 0
             slot = slot_raw / self.slot_t * self.m 
-            print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
+            #print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 slot = int(slot)
                 self.slots[slot] += 1
@@ -147,8 +149,10 @@ class LPDQBaseStation(Device):
         # dump to feedback slot
         yield self.env.timeout(1 - self.slot_t)
         while True:
-            print("sending slots", self.slots)
-            self.send(DQFeedback(self.slots, self.dtq, self.crq), duration = self.feedback_t - self.window_size, is_overhead = True)
+            # print("sending slots", self.slots)
+            duration =  self.feedback_t - self.window_size
+            size = self.rates[0] * duration
+            self._send(DQFeedback(self.slots, self.dtq, self.crq), duration, size, medium_index = 0, is_overhead = True)
 
             # increment the counter accordingly
             for i in range(len(self.slots)):

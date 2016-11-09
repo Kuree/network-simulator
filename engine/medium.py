@@ -1,5 +1,6 @@
 import simpy
 import blinker
+import logging
 from .trace import TraceFormatter
 
 
@@ -39,7 +40,9 @@ class TransmissionMedium:
         #ch.setFormatter(TraceFormatter(env))
         #self.logger.addHandler(ch)
 
-    def add_logger(self, logger):
+    def add_logger(self, logger_name):
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(logging.INFO)
         self.__loggers.append(logger)
 
     def add_device(self, device):
@@ -72,7 +75,6 @@ class TransmissionMedium:
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
         for logger in self.__loggers:
-            print("start logging", packet)
-            logger.debug(packet)
+            logger.info(packet)
 
 
