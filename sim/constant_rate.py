@@ -35,15 +35,19 @@ def main():
     use_seed = args.use_seed
     num_nodes = args.num_nodes
     protocol_type = args.type
-   
-    special_args = {"seed": 0}
+    
+    if use_seed:
+        seeds = [i for i in range(num_nodes + 1)]
+    else:
+        seeds = [random.randint(0, num_nodes * 1000) for i in range(num_nodes + 1)]
+    special_args = {"seed": seeds[0]}
     
     bs = create_basestation(protocol_type, 0, env, "default.json", special_args)
     t.add_device(bs)
     nodes_list = []
 
     for i in range(num_nodes):
-        special_arg = {"total": num_nodes, "scheduled_time": i, "seed": i}
+        special_arg = {"total": num_nodes, "scheduled_time": i, "seed": seeds[i]}
         n = create_node(protocol_type, i, env, "default.json", special_arg)
         nodes_list.append(n)
         t.add_device(n)
