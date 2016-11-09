@@ -1,11 +1,11 @@
 from engine import Device 
 
 class TDMANode(Device):
-    def __init__(self, id, scheduled_time, total, env, seed, jitter_range, transmission_time):
+    def __init__(self, id, scheduled_time, total, env, rates, seed, jitter_range, transmission_time):
         ''' schedule time is when the node should transmit
             it is computed by now % tatal == scheduled_time
         '''
-        super().__init__(id, env, seed=seed, jitter_range = jitter_range)
+        super().__init__(id, env, rates, seed=seed, jitter_range = jitter_range)
         self.scheduled_time = scheduled_time
         self.total = total
         self.transmission_time = transmission_time
@@ -20,7 +20,7 @@ class TDMANode(Device):
 
 
 class TDMABaseStation(Device):
-    def __init__(self, id, env):
-        super().__init__(id, env)
+    def __init__(self, id, env, rates):
+        super().__init__(id, env, rates)
 
         # nothing to be done here

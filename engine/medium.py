@@ -1,8 +1,6 @@
 import simpy
 import blinker
 from .trace import TraceFormatter
-import logging
-import sys
 
 
 class TransmissionPacket:
@@ -34,11 +32,15 @@ class TransmissionMedium:
 
 
         # setup logging
-        self.logger = logging.getLogger(medium_name)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
-        ch.setFormatter(TraceFormatter(env))
-        self.logger.addHandler(ch)
+        self.__loggers = [] 
+        #= logging.getLogger(medium_name)
+        #ch = logging.StreamHandler(sys.stdout)
+        #ch.setLevel(logging.DEBUG)
+        #ch.setFormatter(TraceFormatter(env))
+        #self.logger.addHandler(ch)
+
+    def add_logger(self, logger):
+        self.__loggers.append(logger)
 
     def add_device(self, device):
         ''' this method adds a device to the transmission medium
@@ -69,6 +71,8 @@ class TransmissionMedium:
         duration = packet.duration
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
-        self.logger.debug(packet)
+        for logger in self.__loggers:
+            print("start logging", packet)
+            logger.debug(packet)
 
 

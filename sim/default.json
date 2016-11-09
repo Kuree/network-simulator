@@ -1,4 +1,9 @@
 {
     "jitter_range": 0.005, 
-    "transmission_time": 0.99
+    "transmission_time": 0.99,
+    "rates": [30],
+    "feedback_t": 0.1,
+    "p": 0.05, 
+    "m":3, 
+    "slot_t": 0.1
 }

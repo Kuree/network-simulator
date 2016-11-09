@@ -5,11 +5,12 @@ class Device:
     PRECISION = 0.001
     ''' the base class for simulation node
     '''
-    def __init__(self, id, env, seed = 1, jitter_range = 0.01):
+    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01):
         self.id = id
         self.env = env
         self.random = random.Random(seed)
         self._medium = []
+        self.rates = rates
         self.__is_active = True
         self.jitter_range = jitter_range
         self._busy_time = self.env.now

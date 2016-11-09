@@ -29,12 +29,10 @@ class LPDQNode(Device):
     CRQ  = 3
     WAIT = 4
 
-    def __init__(self, id, env, seed, jitter_range, rate, m, slot_t, feedback_t):
-        super().__init__(id, env, seed=seed, jitter_range=jitter_range)
-        self.rate = rate
+    def __init__(self, id, env, seed, jitter_range, rates, m, slot_t, feedback_t):
+        super().__init__(id, env, rates, seed=seed, jitter_range=jitter_range)
         #self.average_packet_size = average_packet_size
         self.m = m
-        self.rate = rate
         # this controls the time for overhead
         self.slot_t = slot_t
         self.feedback_t = feedback_t
@@ -100,7 +98,7 @@ class LPDQNode(Device):
                 duration = 1 - self.slot_t - self.feedback_t - self.window_size
                 # send data in data slot
                 # TODO: fix the rate here
-                size = duration * self.rate[0]
+                #size = duration * self.rate[0]
                 self._send(1, duration = duration, size=size)
                 self.state = LPDQNode.IDLE
                 sent = True
@@ -111,10 +109,9 @@ class LPDQNode(Device):
 
 
 class LPDQBaseStation(Device):
-    def __init__(self, id, env, seed, m, rate, jitter_range, feedback_t, slot_t):
-        super().__init__(id, env, seed = seed, jitter_range = jitter_range)
+    def __init__(self, id, env, seed, m, rates, jitter_range, feedback_t, slot_t):
+        super().__init__(id, env, rates, seed = seed, jitter_range = jitter_range)
         self.m = m
-        self.rate = rate
         self.feedback_t = feedback_t
         self.slot_t = slot_t
         

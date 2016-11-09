@@ -6,9 +6,9 @@ import json
 import inspect
 
 class ProtocolType:
-    TDMA = 1
-    CSMA = 2
-    LPDQ = 3
+    TDMA = 0
+    CSMA = 1
+    LPDQ = 2
 
 def create_basestation(protocol_type, id, env, config, special_arg = None):
     with open(config) as f:
@@ -47,8 +47,9 @@ def __process_args(func, args, special_arg):
     func_args = inspect.getargspec(func).args
     key_list = args.keys()
     # load the special arg
-    for key in special_arg:
-        args[key] = special_arg[key]
+    if special_arg is not None:
+        for key in special_arg:
+            args[key] = special_arg[key]
     
     args = {k:v for k, v in args.items() if k in func_args}
     return args
