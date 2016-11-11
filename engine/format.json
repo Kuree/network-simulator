@@ -15,7 +15,7 @@
     "name": "size",
     "index": 2,
     "help": "the size of the packet. used to compute throughput",
-    "type": "int"
+    "type": "float"
   },
   {
     "name": "duration",

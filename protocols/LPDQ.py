@@ -81,7 +81,6 @@ class LPDQNode(Device):
                 # compute the offset for slot
                 # sleep_time
                 sleep_time = self.slot_t / self.m * self.chosen_slot
-                #print("slot", self.chosen_slot, "sleep time", sleep_time)
                 yield self.env.timeout(sleep_time)
                 duration = self.slot_t / self.m - self.window_size
                 size = duration * self.rates[0]
@@ -100,7 +99,7 @@ class LPDQNode(Device):
                 duration = 1 - self.slot_t - self.feedback_t - self.window_size
                 # send data in data slot
                 # TODO: fix the rate here
-                #size = duration * self.rate[0]
+                size = duration * self.rates[0]
                 self._send(payload, duration = duration, size=size, medium_index = 0, is_overhead = False)
                 self.state = LPDQNode.IDLE
                 sent = True

@@ -5,7 +5,7 @@ from .trace import TraceFormatter
 
 
 class TransmissionPacket:
-    def __init__(self, timestamp, id, payload, duration, size = 1, valid = True, is_overhead = False):
+    def __init__(self, timestamp, id, payload, duration, size, valid = True, is_overhead = False):
         #self.env = env
         self.timestamp = timestamp
         self.payload = payload

@@ -7,13 +7,13 @@ import os
 
 
 class Analyzer:
-    def __init__(self, filename):
+    def __init__(self, filename, rate):
         if not os.path.isfile(filename):
             raise Exception("Log file does not exist")
         with open(filename) as f:
             raw_data = f.readlines()
             self.packet_data = [l.split() for l in raw_data]
-    
+        self.rate = rate
 
 
     def process_raw(self, packet_data):
@@ -28,7 +28,7 @@ class Analyzer:
             node_id = int(node_id)
             packet[1] = node_id
 
-            size = int(size)
+            size = float(size)
             packet[2] = size
 
             duration = float(duration)
@@ -52,16 +52,19 @@ class Analyzer:
 
     def compute_stats(self):
         total_time = self.process_raw(self.packet_data)
-        throughput = sum([packet[2] for packet in self.packet_data if not packet[-1]]) / total_time
+        print(self.packet_data[0])
+        throughput = sum([packet[2] for packet in self.packet_data if not packet[-1] and not packet[-2]]) / total_time
 
         return total_time, throughput
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trace analyzer for network simulation output")
     parser.add_argument("-f", action="store", dest="filename", type=str, required=True, help="file name for the log file")
+    parser.add_argument("-r", action="store", dest="rate", type=float, default=30, help="rate used to compute utility")
 #parser.add_argument("-format", action="store", dest="format", type=str, default="format.json", help="format file for the trace")
     args = parser.parse_args()
 
     filename = args.filename
-    an = Analyzer(filename)
+    rate = args.rate
+    an = Analyzer(filename, rate)
     print(*an.compute_stats())
