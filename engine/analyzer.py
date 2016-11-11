@@ -34,7 +34,7 @@ class Analyzer:
             duration = float(duration)
             packet[3] = duration
 
-            is_overhead = bool(is_overhead)
+            is_overhead = bool(int(is_overhead))
             packet[4] = is_overhead
 
             if timestamp < busy_time:
@@ -52,7 +52,6 @@ class Analyzer:
 
     def compute_stats(self):
         total_time = self.process_raw(self.packet_data)
-        print(self.packet_data[0])
         throughput = sum([packet[2] for packet in self.packet_data if not packet[-1] and not packet[-2]]) / total_time
 
         return total_time, throughput

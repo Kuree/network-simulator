@@ -4,6 +4,8 @@ from protocols import create_basestation, create_node, ProtocolType
 import logging
 import numpy
 import sys
+import random
+
 
 def sending(nodes, pr, env):
     rate = pr * len(nodes)
@@ -12,7 +14,7 @@ def sending(nodes, pr, env):
         num_of_trans = int(numpy.random.poisson(rate))
         nodes_to_trans = numpy.random.choice(nodes, num_of_trans)
         for n in nodes_to_trans:
-            n.send(dummy_payload, 20)
+            n.send(dummy_payload, n.MTU)
         yield env.timeout(1)
 
 def main():
@@ -38,6 +40,8 @@ def main():
     
     if use_seed:
         seeds = [i for i in range(num_nodes + 1)]
+        numpy.random.seed(0)
+        random.seed(0)
     else:
         seeds = [random.randint(0, num_nodes * 1000) for i in range(num_nodes + 1)]
     special_args = {"seed": seeds[0]}

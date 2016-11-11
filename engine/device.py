@@ -1,11 +1,14 @@
 import random
-from queue import Queue
+from collections import deque
+import simpy
+import math
+
 
 class Device:
     PRECISION = 0.001
     ''' the base class for simulation node
     '''
-    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01):
+    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, guard = 0.01, MTU = 20):
         self.id = id
         self.env = env
         self.random = random.Random(seed)
@@ -15,8 +18,13 @@ class Device:
         self.jitter_range = jitter_range
         self._busy_time = self.env.now
         self.__current_packet = None
+        self.guard = guard
 
-        self.__transmission_queue = Queue()
+        self.MTU = MTU
+
+        self.__transmission_queue = deque([])
+
+        self.antenna = simpy.Resource(env, capacity=1)
 
         self.env.process(self.__scheduler())
 
@@ -76,11 +84,21 @@ class Device:
 
     def send(self, payload, size, medium_index = 0):
         # TODO: fix rate
-        duration = size / self.rates[0]
-        self.__transmission_queue.put((payload, duration, size, medium_index, False))
+        # doing fragmentation here
+        # NOTE: the actual payload won't be sliced into chunks
+        #       this is for simulation only
+        last_chunk = size % self.rates[0]
+        chunks = [self.MTU for i in range(int(size // self.rates[0]))]
+        if last_chunk != 0:
+            chunks.append(last_chunk)
+        for chunk in chunks:
+            self.__transmission_queue.append((payload, chunk / self.rates[0], chunk, medium_index, False, self.antenna))
 
     def _get_queue_len(self):
         return len(self.__transmission_queue)
+
+    def _compute_mtu(self, time, rate):
+        return int(math.floor(rate * time))
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
         # need to override this method for every protocol
@@ -89,10 +107,10 @@ class Device:
 
     def __scheduler(self):
         while True:
-            if self.__transmission_queue.empty():
+            if len(self.__transmission_queue) == 0:
                 yield self.env.timeout(Device.PRECISION)
             else:
-                args = self.__transmission_queue.get()
+                args = self.__transmission_queue.popleft()
                 self.env.process(self._schedule_send(*args))
 
     def delay(self):

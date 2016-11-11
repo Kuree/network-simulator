@@ -5,5 +5,6 @@
     "feedback_t": 0.1,
     "p": 0.05, 
     "m":3, 
-    "slot_t": 0.1
+    "slot_t": 0.1,
+    "guard": 0.01
 }
