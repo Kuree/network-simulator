@@ -6,5 +6,5 @@ import simpy
 import logging
 import random
 import argparse
-from engine import TransmissionMedium, SimArg, TraceFormatter
+from engine import TransmissionMedium, SimArg, TraceFormatter, Simulator
 from protocols import create_basestation, create_node, ProtocolType
