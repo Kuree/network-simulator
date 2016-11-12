@@ -4,8 +4,7 @@ import os
 
 class TraceFormatter(logging.Formatter):
     TRACE_FORMAT = "format.json"
-    def __init__(self, env):
-        self.env = env
+    def __init__(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), TraceFormatter.TRACE_FORMAT)
         with open(filename) as f:
             self.values = json.load(f)

@@ -8,43 +8,50 @@ import random
 
 
 class ConstantSimulator(Simulator):
-    def __init__(self, total_time, use_seed, num_nodes, protocol_type, name, pr):
-        super().__init__(name, total_time)
-        if use_seed:
-            seeds = [i for i in range(num_nodes + 1)]
+    def __init__(self, total_time, use_seed, num_nodes, protocol_type, log_prefix):
+        super().__init__(total_time)
+        self.use_seed = use_seed
+        self.num_nodes = num_nodes
+        self.protocol_type = protocol_type
+        self.log_prefix = log_prefix
+
+
+    def _run(self, env, pr):
+        if self.use_seed:
+            seeds = [i for i in range(self.num_nodes + 1)]
             numpy.random.seed(0)
             random.seed(0)
         else:
-            seeds = [random.randint(0, num_nodes * 1000) for i in range(num_nodes + 1)]
+            seeds = [random.randint(0, self.num_nodes * 1000) for i in range(self.num_nodes + 1)]
         special_args = {"seed": seeds[0]}
+        name = self.log_prefix + str(pr)
+        t = TransmissionMedium(env, name)
+        t.add_logger(name)
+        bs = create_basestation(self.protocol_type, 0, env, "default.json", special_args)
+        t.add_device(bs)
         
-        bs = create_basestation(protocol_type, 0, self.env, "default.json", special_args)
-        self.t.add_device(bs)
-
-        self.pr = pr
-
-        for i in range(num_nodes):
-            special_arg = {"total": num_nodes, "scheduled_time": i, "seed": seeds[i]}
-            n = create_node(protocol_type, i, self.env, "default.json", special_arg)
-            self.nodes.append(n)
-            self.t.add_device(n)
+        nodes = []
+        
+        for i in range(self.num_nodes):
+            special_arg = {"total": self.num_nodes, "scheduled_time": i, "seed": seeds[i]}
+            n = create_node(self.protocol_type, i, env, "default.json", special_arg)
+            nodes.append(n)
+            t.add_device(n)
 
 
-    def _run(self):
-        rate = self.pr * len(self.nodes)
+        rate = pr * len(nodes)
         dummy_payload = "Test"
         while True:
             num_of_trans = int(numpy.random.poisson(rate))
-            nodes_to_trans = numpy.random.choice(self.nodes, num_of_trans)
+            nodes_to_trans = numpy.random.choice(nodes, num_of_trans)
             for n in nodes_to_trans:
                 n.send(dummy_payload, n.MTU)
-            yield self.env.timeout(1)
+            yield env.timeout(1)
 
 def main():
     parser = SimArg("Simulation with constant packet rate")
     args = parser.parse_args()
 
-    medium_name = "const_rate"
     
     # setting up logger    
     total_time = args.sim_time
@@ -53,18 +60,22 @@ def main():
     pr = args.packet_rate
     protocol_type = args.type
 
-    sim = ConstantSimulator(total_time, use_seed, num_nodes, protocol_type, medium_name, pr)
-    
-    logger = logging.getLogger(medium_name)
-    
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setFormatter(TraceFormatter(sim.env))
-    ch.setLevel(logging.INFO)
-    logger.addHandler(ch)
-    
-    sim.add_logger(medium_name)
-    
-    sim.run()
+    log_prefix = "rate-"
+
+    sim = ConstantSimulator(total_time, use_seed, num_nodes, protocol_type, log_prefix)
+    rates = [0.1, 0.15]
+
+    for rate in rates:
+        name = log_prefix + str(rate)
+        logger = logging.getLogger(name)
+        
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setFormatter(TraceFormatter())
+        ch.setLevel(logging.INFO)
+        logger.addHandler(ch)
+        
+ 
+    sim.start(rates)
    
 
 
