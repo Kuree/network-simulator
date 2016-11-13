@@ -51,7 +51,12 @@ class Analyzer:
         return busy_time
 
     def compute_stats(self):
+        '''
+            return total_time, average throughput, channel utility
+        '''
         total_time = self.process_raw(self.packet_data)
+        if total_time == 0:
+            return 0, 0, 0
         throughput = sum([packet[2] for packet in self.packet_data if not packet[-1] and not packet[-2]]) / total_time
 
         return total_time, throughput, throughput / self.rate

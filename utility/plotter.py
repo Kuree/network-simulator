@@ -8,8 +8,15 @@ import json
 
 
 def parse_name(path, config):
-    # results: 
-    # [legend entry, x]
+    '''
+        first it will split path in entries by '-'
+        config foramt:
+            "name": a list of [index1, index2, bool]. if not bool, result[index2] = entries[index1] else use the legend[entries[index1]]
+            "rate": the max transmission rate of the channel
+            "legend": used to indicate which one is which. notice that str is used in entry key
+        results: 
+        [legend entry, x]
+    '''
     path = os.path.basename(path)
     config_name = config["name"]
     entries = path.split("-")
@@ -24,6 +31,7 @@ def parse_name(path, config):
 
 
 def plot(data):
+    ''' plot the data points'''
     fig, ax = plt.subplots()
     for legend in data:
         data_pairs = data[legend]
@@ -46,6 +54,7 @@ def main():
 
     dir_path = args.dir_path
     config_file = args.config
+    # check all the parameters
     if not os.path.isdir(dir_path):
         print("log folder does not exist")
         exit()
@@ -61,14 +70,15 @@ def main():
     for path in data_files:
         path = os.path.join(dir_path, path)
         legend, x_label = parse_name(path, config)
+        # call the analyzer to analyze the trace files
         ana = Analyzer(path, config["rate"])
         result = ana.compute_stats()
+        # add the data points
         if legend in data:
             data[legend].append((x_label, result[-1]))
         else:
             data[legend] = [(x_label, result[-1])]
 
-    print(data)
     plot(data)
 
     plt.show()
