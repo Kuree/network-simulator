@@ -1,0 +1,12 @@
+{
+  "name": [
+    [0, 0, true],
+    [2, 1, false]
+  ],
+  "rate" : 30,
+  "legend": {
+    "0": "TDMA",
+    "1": "P-CSMA",
+    "2": "LPDQ"
+  }
+}

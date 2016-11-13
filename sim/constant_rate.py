@@ -5,7 +5,7 @@ import logging
 import numpy
 import sys
 import random
-
+import os
 
 class ConstantSimulator(Simulator):
     def __init__(self, total_time, use_seed, num_nodes, protocol_type, log_prefix):
@@ -57,19 +57,19 @@ def main():
     total_time = args.sim_time
     use_seed = args.use_seed
     num_nodes = args.num_nodes
-    pr = args.packet_rate
+    #pr = args.packet_rate
     protocol_type = args.type
 
     log_prefix = "rate-"
 
     sim = ConstantSimulator(total_time, use_seed, num_nodes, protocol_type, log_prefix)
-    rates = [0.1, 0.15]
+    rates = [0.001 * i for i in range(1, 50)]
 
     for rate in rates:
         name = log_prefix + str(rate)
         logger = logging.getLogger(name)
         
-        ch = logging.StreamHandler(sys.stdout)
+        ch = logging.FileHandler(os.path.join("rate_log", str(protocol_type) + "-" + name))
         ch.setFormatter(TraceFormatter())
         ch.setLevel(logging.INFO)
         logger.addHandler(ch)

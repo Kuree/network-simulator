@@ -54,7 +54,7 @@ class Analyzer:
         total_time = self.process_raw(self.packet_data)
         throughput = sum([packet[2] for packet in self.packet_data if not packet[-1] and not packet[-2]]) / total_time
 
-        return total_time, throughput
+        return total_time, throughput, throughput / self.rate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trace analyzer for network simulation output")
