@@ -68,8 +68,10 @@ def main():
     for rate in rates:
         name = log_prefix + str(rate)
         logger = logging.getLogger(name)
-        
-        ch = logging.FileHandler(os.path.join("rate_log", str(protocol_type) + "-" + name))
+        if args.stdout:
+            ch = logging.StreamHandler(sys.stdout)
+        else:
+            ch = logging.FileHandler(os.path.join("rate_log", str(protocol_type) + "-" + name))
         ch.setFormatter(TraceFormatter())
         ch.setLevel(logging.INFO)
         logger.addHandler(ch)
