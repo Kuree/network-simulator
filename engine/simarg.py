@@ -14,3 +14,5 @@ class SimArg(argparse.ArgumentParser):
 
         self.add_argument("-type", action="store", dest="type", required=True, type=int, help="choose which protocol to use. 0: TDMA, 1: P-CSMA, 2: LPDQ")
         self.add_argument("-stdout", action="store_true", dest="stdout", default=False, help="if set, the logger will print the result to stdout")
+
+        self.add_argument("-test", action="store_true", dest="test", default=False, help="if set, it will tell the simulator that it's a test case")

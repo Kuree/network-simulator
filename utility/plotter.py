@@ -64,7 +64,7 @@ def main():
     with open(config_file) as f:
         config = json.load(f)
 
-    data_files = os.listdir(dir_path)
+    data_files = [path for path in os.listdir(dir_path) if path[0] != "."]
 
     data = {}
     for path in data_files:

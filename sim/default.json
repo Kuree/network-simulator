@@ -1,5 +1,5 @@
 {
-    "jitter_range": 0.005, 
+    "jitter_range": 0.001, 
     "transmission_time": 0.99,
     "rates": [30],
     "feedback_t": 0.1,

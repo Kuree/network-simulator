@@ -21,7 +21,7 @@ class DQFeedback(DQObject):
         self.crq = crq
 
 
-class LPDQNode(Device):
+class DQNNode(Device):
     # finite state machine
     IDLE = 0
     IN_TRANSMISSION = 1
@@ -29,7 +29,7 @@ class LPDQNode(Device):
     CRQ  = 3
     WAIT = 4
 
-    def __init__(self, id, env, seed, jitter_range, rates, m, slot_t, feedback_t, guard):
+    def __init__(self, id, env, seed, jitter_range, rates, m, N, slot_t, feedback_t, guard):
         MTU = self._compute_mtu(1 - slot_t - feedback_t - guard * (m + 1), rates[0])
         super().__init__(id, env, rates, seed=seed, jitter_range=jitter_range, guard=guard, MTU = MTU)
         #self.average_packet_size = average_packet_size
@@ -38,26 +38,28 @@ class LPDQNode(Device):
         self.slot_t = slot_t
         self.feedback_t = feedback_t
 
+        self.N = N
+
         # smooth out the start up process
         self.sleep_time = 0
         
         self.chosen_slot = 0
         
-        self.state = LPDQNode.IDLE
+        self.state = DQNNode.IDLE
 
     def on_receive(self, packet):
-        if self.state == LPDQNode.WAIT:
+        if self.state == DQNNode.WAIT:
             payload = packet.payload
             if type(payload) != DQFeedback:
                 return # not valid packet
             if payload.slots[self.chosen_slot] == 1: # it's a successful request
-                print("received slots", payload.slots)
+                #print("received slots", payload.slots)
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] == 1:
                         queue_position += 1 # compute the dtq
                 self.sleep_time = payload.dtq + queue_position
-                self.state = LPDQNode.DTQ
+                self.state = DQNNode.DTQ
             else:
                 # enter crq
                 queue_position = 0
@@ -65,18 +67,18 @@ class LPDQNode(Device):
                     if payload.slots[i] > 1:
                         queue_posiiton += 1 # compute the crq position
                 self.sleep_time = payload.crq + queue_position
-                self.state = LPDQNode.CRQ
+                self.state = DQNNode.CRQ
 
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         with antenna.request() as req:
             yield req
             sent = False
-            self.state = LPDQNode.IN_TRANSMISSION
+            self.state = DQNNode.IN_TRANSMISSION
             self.sleep_time = 1 - (self.env.now % 1)
             while not sent:
                 yield self.env.timeout(self.sleep_time)
-                if self.state == LPDQNode.IN_TRANSMISSION:
+                if self.state == DQNNode.IN_TRANSMISSION:
                     self.chosen_slot = self.random.randrange(self.m)
                     # compute the offset for slot
                     # sleep_time
@@ -85,30 +87,30 @@ class LPDQNode(Device):
                     slot_duration = self.slot_t / self.m - self.guard
                     slot_size = slot_duration * self.rates[0]
                     self._send(DQRequest(self.chosen_slot), slot_duration, slot_size, 0, is_overhead = True)
-                    print("id:", self.id, "slot", self.chosen_slot) 
+                    #print("id:", self.id, "slot", self.chosen_slot) 
 
                     # this will put it to sleep till contention result is out
                     # TODO: fix this ugly approach
-                    self.state = LPDQNode.WAIT
+                    self.state = DQNNode.WAIT
                     yield self.env.timeout(1 - (self.env.now % 1))
                     
-                elif self.state == LPDQNode.DTQ:
+                elif self.state == DQNNode.DTQ:
                     # skip the slot time
                     yield self.env.timeout(self.slot_t)
                     # send dummpy payload
                     # send data in data slot
                     # TODO: fix the rate here
                     self._send(payload, duration = duration, size=size, medium_index = 0, is_overhead = False)
-                    self.state = LPDQNode.IDLE
+                    self.state = DQNNode.IDLE
                     sent = True
-                elif self.state == LPDQNode.CRQ:
+                elif self.state == DQNNode.CRQ:
                     # try to transmit again
                     self.sleep_time = 1 - (self.env.now % 1)
-                    self.state = LPDQNode.IN_TRANSMISSION
+                    self.state = DQNNode.IN_TRANSMISSION
 
 
-class LPDQBaseStation(Device):
-    def __init__(self, id, env, seed, m, rates, jitter_range, feedback_t, slot_t):
+class DQNBaseStation(Device):
+    def __init__(self, id, env, seed, m, rates, N, jitter_range, feedback_t, slot_t):
         super().__init__(id, env, rates, seed = seed, jitter_range = jitter_range)
         self.m = m
         self.feedback_t = feedback_t
@@ -117,6 +119,8 @@ class LPDQBaseStation(Device):
         self.window_size = 0.01 # 0.1 buffer
         self.dtq = 0
         self.crq = 0
+
+        self.N = N
 
         self.__init_slots()
 
@@ -131,7 +135,7 @@ class LPDQBaseStation(Device):
             if slot_raw < 0:
                 slot_raw = 0
             slot = int(slot_raw / self.slot_t * self.m)
-            print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
+            #print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 self.slots[slot] += 1
         
@@ -145,7 +149,7 @@ class LPDQBaseStation(Device):
         # dump to feedback slot
         yield self.env.timeout(1 - self.slot_t)
         while True:
-            print("sending slots", self.slots)
+            # print("sending slots", self.slots)
             duration =  self.feedback_t - self.window_size
             size = self.rates[0] * duration
             self._send(DQFeedback(self.slots, self.dtq, self.crq), duration, size, medium_index = 0, is_overhead = True)

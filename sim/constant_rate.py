@@ -42,8 +42,8 @@ class ConstantSimulator(Simulator):
         rate = pr * len(nodes)
         dummy_payload = "Test"
         while True:
-            num_of_trans = int(numpy.random.poisson(rate))
-            nodes_to_trans = numpy.random.choice(nodes, num_of_trans)
+            num_of_trans = numpy.random.poisson(rate)
+            nodes_to_trans = random.sample(nodes, num_of_trans)
             for n in nodes_to_trans:
                 n.send(dummy_payload, n.MTU)
             yield env.timeout(1)
@@ -61,14 +61,18 @@ def main():
     protocol_type = args.type
 
     log_prefix = "rate-"
+    if args.test:
+        rates = [1 / num_nodes]
+        use_seed = True
+    else:
+        rates = [0.1 / num_nodes * i for i in range(1, 21)]
 
     sim = ConstantSimulator(total_time, use_seed, num_nodes, protocol_type, log_prefix)
-    rates = [0.001 * i for i in range(1, 50)]
-
+        
     for rate in rates:
         name = log_prefix + str(rate)
         logger = logging.getLogger(name)
-        if args.stdout:
+        if args.stdout or args.test:
             ch = logging.StreamHandler(sys.stdout)
         else:
             ch = logging.FileHandler(os.path.join("rate_log", str(protocol_type) + "-" + name))
