@@ -63,7 +63,7 @@ class LPDQNode(Device):
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] > 1:
-                        queue_posiiton += 1 # compute the crq position
+                        queue_position += 1 # compute the crq position
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
 
@@ -135,7 +135,13 @@ class LPDQBaseStation(Device):
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 self.slots[slot] += 1
         
-
+    def _on_collision(self):
+        time = self.env.now % 1
+        print("collision time", time)
+        if time < self.slot_t: # collision in the request slot
+            slot = int(time / self.slot_t * self.m) + 1
+            if slot < self.m:
+                self.slots[slot] += 2
 
     def __init_slots(self):
         self.slots = [0 for i in range(self.m)]

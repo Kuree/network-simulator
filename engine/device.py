@@ -37,6 +37,9 @@ class Device:
     def wake_up(self):
         self.__is_active = True
 
+    def _on_collision(self):
+        pass
+
     def _on_receive(self, packet):
         # this needs to resolve several problem
         # 1. collision among packets
@@ -50,6 +53,8 @@ class Device:
             packet.valid = False
             if self.__current_packet is not None:
                 self.__current_packet.valid = False
+            # signal the collision
+            self._on_collision()
 
             # drop the packet. i.e. don't even bother to update the current packet
         else:
