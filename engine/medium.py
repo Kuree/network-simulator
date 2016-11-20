@@ -16,7 +16,7 @@ class TransmissionPacket:
         self.size = size
 
 class TransmissionMedium:
-    PRECISION = 0.001
+    PRECISION = 0.0001
     
     def __init__(self, env, medium_name = "signal"):
         self.env = env

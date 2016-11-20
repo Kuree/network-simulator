@@ -8,5 +8,8 @@
     "0": "TDMA",
     "1": "P-CSMA",
     "2": "LPDQ"
-  }
+  },
+  "xscale": 100000,
+  "xlabel": "Network load (%)",
+  "ylabel": "Network Utility"
 }

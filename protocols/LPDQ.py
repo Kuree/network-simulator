@@ -51,7 +51,7 @@ class LPDQNode(Device):
             if type(payload) != DQFeedback:
                 return # not valid packet
             if payload.slots[self.chosen_slot] == 1: # it's a successful request
-                print("received slots", payload.slots)
+                #print("received slots", payload.slots)
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] == 1:
@@ -85,7 +85,7 @@ class LPDQNode(Device):
                     slot_duration = self.slot_t / self.m - self.guard
                     slot_size = slot_duration * self.rates[0]
                     self._send(DQRequest(self.chosen_slot), slot_duration, slot_size, 0, is_overhead = True)
-                    print("id:", self.id, "slot", self.chosen_slot) 
+                    #print("id:", self.id, "slot", self.chosen_slot) 
 
                     # this will put it to sleep till contention result is out
                     # TODO: fix this ugly approach
@@ -131,13 +131,13 @@ class LPDQBaseStation(Device):
             if slot_raw < 0:
                 slot_raw = 0
             slot = int(slot_raw / self.slot_t * self.m)
-            print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
+            #print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 self.slots[slot] += 1
         
     def _on_collision(self):
         time = self.env.now % 1
-        print("collision time", time)
+        # print("collision time", time)
         if time < self.slot_t: # collision in the request slot
             slot = int(time / self.slot_t * self.m) + 1
             if slot < self.m:
@@ -151,7 +151,7 @@ class LPDQBaseStation(Device):
         # dump to feedback slot
         yield self.env.timeout(1 - self.slot_t)
         while True:
-            print("sending slots", self.slots)
+            #print("sending slots", self.slots)
             duration =  self.feedback_t - self.window_size
             size = self.rates[0] * duration
             self._send(DQFeedback(self.slots, self.dtq, self.crq), duration, size, medium_index = 0, is_overhead = True)

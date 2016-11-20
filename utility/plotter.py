@@ -3,6 +3,7 @@ import os
 from analyzer import Analyzer
 import matplotlib.pyplot as plt
 import json
+#import numpy
 
 # this plotter tries to plot the line graph
 
@@ -25,25 +26,25 @@ def parse_name(path, config):
         if use_name:
             value = config["legend"][entries[index1]]
         else:
-            value = entries[index1]
+            value = float(entries[index1])
         result[index2] = value
     return result
 
 
-def plot(data):
+def plot(data, xscale):
     ''' plot the data points'''
     fig, ax = plt.subplots()
     for legend in data:
         data_pairs = data[legend]
         data_pairs.sort(key=lambda x: x[0])
         
-        x = [entry[0] for entry in data_pairs]
+        x = [entry[0] * xscale for entry in data_pairs]
         y = [entry[1] for entry in data_pairs]
 
         ax.plot(x, y, label=legend)
     legend = ax.legend(loc="upper left")
 
-
+    return ax
 
 
 def main():
@@ -78,8 +79,13 @@ def main():
             data[legend].append((x_label, result[-1]))
         else:
             data[legend] = [(x_label, result[-1])]
-
-    plot(data)
+    if "xscale" in config:
+        xscale = config["xscale"]
+    else:
+        xscale = 1
+    ax = plot(data, xscale)
+    ax.set_xlabel(config["xlabel"])
+    ax.set_ylabel(config["ylabel"])
 
     plt.show()
 

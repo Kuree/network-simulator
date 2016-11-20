@@ -105,9 +105,12 @@ class Device:
     def _compute_mtu(self, time, rate):
         return int(math.floor(rate * time))
 
-    def _schedule_send(self, payload, duration, size, medium_index, is_overhead):
+    def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         # need to override this method for every protocol
-        yield self.env.timeout(0)
+        with antenna.request() as req:
+            yield req
+            self._send(payload, duration, size, medium_index, is_overhead)
+            yield self.env.timeout(duration)
 
 
     def __scheduler(self):
