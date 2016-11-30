@@ -13,7 +13,10 @@ class TDMANode(Device):
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         with antenna.request() as req:
             yield req
-            next_basetime = self.env.now - (self.env.now % self.total) + self.total 
+            if self.env.now % self.total < self.scheduled_time:
+                next_basetime = self.env.now - self.env.now % self.total
+            else:
+                next_basetime = self.env.now - (self.env.now % self.total) + self.total 
             scheduled_time = next_basetime + self.scheduled_time + self.guard
             sleep_time = scheduled_time - self.env.now
             yield self.env.timeout(sleep_time)
