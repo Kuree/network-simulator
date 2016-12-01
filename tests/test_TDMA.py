@@ -7,7 +7,7 @@ import simpy
 def test(env, nodes, bs):
     def on_receive5(*args):
         assert abs(env.now - 6) < 0.1
-    bs.on_receive = on_receive5
+    bs.on_receive += on_receive5
     nodes[5].send("test", nodes[5].MTU)
     yield env.timeout(10)
     
@@ -15,7 +15,8 @@ def test(env, nodes, bs):
     def on_receive2(*args):
         assert abs(env.now - 23) < 0.1
     yield env.timeout(3)
-    bs.on_receive = on_receive2
+    bs.on_receive -= on_receive5
+    bs.on_receive += on_receive2
     nodes[2].send("test", nodes[2].MTU)
     yield env.timeout(15)
 

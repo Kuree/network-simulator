@@ -23,7 +23,7 @@ if __name__ == "__main__":
         t = TransmissionMedium(env)
         d1 = Device(1, env, [20])
         d2 = Device(2, env, [20])
-        d1.on_receive = listen
+        d1.on_receive += listen
         t.add_device(d1)
         t.add_device(d2)
         # this one should be successful

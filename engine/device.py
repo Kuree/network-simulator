@@ -3,6 +3,21 @@ from collections import deque
 import simpy
 import math
 
+class FunctionDelegate:
+    def __init__(self):
+        self.__functions = []
+
+    def __call__(self, *args, **karg):
+        for f in self.__functions:
+            f(*args, **karg)
+
+    def __iadd__(self, f):
+        self.__functions.append(f)
+        return self
+
+    def __isub__(self, f):
+        self.__functions.remove(f)
+        return self
 
 class Device:
     PRECISION = 0.001
@@ -20,11 +35,14 @@ class Device:
         self.__current_packet = None
         self.guard = guard
 
+        self.on_receive = FunctionDelegate()
+
         self.MTU = MTU
 
         self.__transmission_queue = deque([])
 
         self.antenna = simpy.Resource(env, capacity=1)
+
 
         self.env.process(self.__scheduler())
 
@@ -71,10 +89,6 @@ class Device:
         yield self.env.timeout(time_to_sleep)
         if packet.valid:
             self.on_receive(packet)
-
-    def on_receive(self, packet):
-        # this will be called only after the packet is successfuly received
-        pass
 
     def jitter(self):
         ''' return the random jitter for the device

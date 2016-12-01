@@ -7,14 +7,15 @@ import simpy
 def test(env, nodes, bs):
     def on_receive5(*args):
         assert abs(env.now - 1) < 0.1
-    bs.on_receive = on_receive5
+    bs.on_receive += on_receive5
     nodes[0].send("test", nodes[0].MTU)
     yield env.timeout(3)
     
     # simulation time now is 3
     def on_receive2(*args):
         assert abs(env.now - 4) < 0.1
-    bs.on_receive = on_receive2
+    bs.on_receive -= on_receive5
+    bs.on_receive += on_receive2
     
     nodes[2].send("test", nodes[2].MTU)
     yield env.timeout(0.8)
@@ -23,7 +24,8 @@ def test(env, nodes, bs):
     def on_receive3(*args):
         assert abs(env.now - 5) < 0.1
     yield env.timeout(0.5)
-    bs.on_receive = on_receive3
+    bs.on_receive -= on_receive2
+    bs.on_receive += on_receive3
     yield env.timeout(20)
 
 

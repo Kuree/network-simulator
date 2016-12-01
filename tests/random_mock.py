@@ -1,5 +1,7 @@
 import itertools
-class Random:
+import random
+
+class RandomMock:
     def __init__(self, numbers):
         ''' a number generator'''
         self.it = itertools.cycle(numbers)
@@ -13,11 +15,13 @@ class Random:
         next_random = next(self.it)
         return next_random % stop
 
-
+    def random(self):
+        # use the old one
+        return random.random()
 
 if __name__ == "__main__":
     lst = list(range(10))
-    r = Random(lst)
+    r = RandomMock(lst)
     for i in lst:
         assert r.randrange(10) == i
     # test for different range
