@@ -34,12 +34,17 @@ class Device:
         self.__current_packet = None
         self.guard = guard
 
+        self.should_send = False
+
         self.on_receive = FunctionDelegate()
         self.MTU = MTU
         self.antenna = simpy.Resource(env, capacity=1)
 
     def is_active(self):
         return self.__is_active
+
+    def cancel(self):
+        self.should_send = False
 
     def sleep(self):
         self.__is_active = False
@@ -101,8 +106,10 @@ class Device:
         last_chunk = size % self.rates[0]
         chunks = [self.MTU for i in range(int(size // self.rates[0]))]
         if last_chunk != 0:
+            self.should_send = True
             chunks.append(last_chunk)
         for chunk in chunks:
+            self.should_send = True
             args = (payload, chunk / self.rates[0], chunk, medium_index, False, self.antenna)
             self.env.process(self._schedule_send(*args))
 

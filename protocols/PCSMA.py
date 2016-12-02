@@ -10,13 +10,12 @@ class CSMANode(Device):
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         with antenna.request() as req:
             yield req
-            sent = False
-            while not sent:
+            while self.should_send:
                 prob = self.random.random() < self.p
                 if not self.is_medium_busy() and prob:
                     yield self.env.timeout(self.random.random() * self.DELAY) # DELAY
                     self._send(payload, duration, size, medium_index, is_overhead)
-                    sent = True
+                    self.should_send = False
                 else:
                     yield self.env.timeout(self.random.random() * self.PRECISION)
 

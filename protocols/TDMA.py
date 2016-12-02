@@ -22,6 +22,7 @@ class TDMANode(Device):
             yield self.env.timeout(sleep_time)
             self._send(payload, duration, size, medium_index, is_overhead)
             yield self.env.timeout(duration)
+            self.should_send = False
 
 class TDMABaseStation(Device):
     def __init__(self, id, env, rates):
