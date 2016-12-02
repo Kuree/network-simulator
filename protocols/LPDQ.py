@@ -45,27 +45,33 @@ class LPDQNode(Device):
         
         self.state = LPDQNode.IDLE
 
-    def on_receive(self, packet):
+        self.on_receive += self.__node_on_receive
+
+    def __node_on_receive(self, packet):
         if self.state == LPDQNode.WAIT:
             payload = packet.payload
             if type(payload) != DQFeedback:
                 return # not valid packet
+            print("received slots", payload.slots)
             if payload.slots[self.chosen_slot] == 1: # it's a successful request
-                #print("received slots", payload.slots)
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] == 1:
                         queue_position += 1 # compute the dtq
                 self.sleep_time = payload.dtq + queue_position
                 self.state = LPDQNode.DTQ
-            else:
+            elif payload.slots[self.chosen_slot] > 1:
                 # enter crq
                 queue_position = 0
                 for i in range(self.chosen_slot):
                     if payload.slots[i] > 1:
                         queue_position += 1 # compute the crq position
                 self.sleep_time = payload.crq + queue_position
+                print("node sleep time", self.sleep_time)
                 self.state = LPDQNode.CRQ
+            else:
+                # TODO: this is packet loss
+                raise Exception("time", self.env.now, "id", self.id, "chosen", self.chosen_slot)
 
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
@@ -73,7 +79,7 @@ class LPDQNode(Device):
             yield req
             sent = False
             self.state = LPDQNode.IN_TRANSMISSION
-            self.sleep_time = 1 - (self.env.now % 1)
+            self.sleep_time = (1 - (self.env.now % 1)) % 1
             while not sent:
                 yield self.env.timeout(self.sleep_time)
                 if self.state == LPDQNode.IN_TRANSMISSION:
@@ -85,7 +91,7 @@ class LPDQNode(Device):
                     slot_duration = self.slot_t / self.m - self.guard
                     slot_size = slot_duration * self.rates[0]
                     self._send(DQRequest(self.chosen_slot), slot_duration, slot_size, 0, is_overhead = True)
-                    #print("id:", self.id, "slot", self.chosen_slot) 
+                    print("id:", self.id, "slot", self.chosen_slot) 
 
                     # this will put it to sleep till contention result is out
                     # TODO: fix this ugly approach
@@ -94,6 +100,7 @@ class LPDQNode(Device):
                     
                 elif self.state == LPDQNode.DTQ:
                     # skip the slot time
+                    yield self.env.timeout(self.sleep_time) # wait in queue
                     yield self.env.timeout(self.slot_t)
                     # send dummpy payload
                     # send data in data slot
@@ -103,7 +110,7 @@ class LPDQNode(Device):
                     sent = True
                 elif self.state == LPDQNode.CRQ:
                     # try to transmit again
-                    self.sleep_time = 1 - (self.env.now % 1)
+                    self.sleep_time = (1 - (self.env.now % 1)) % 1
                     self.state = LPDQNode.IN_TRANSMISSION
 
 
@@ -119,11 +126,12 @@ class LPDQBaseStation(Device):
         self.crq = 0
 
         self.__init_slots()
+        self.on_receive += self.__bs_on_receive
 
         self.env.process(self.run())
 
 
-    def on_receive(self, packet):
+    def __bs_on_receive(self, packet):
         payload = packet.payload
         if type(payload) == DQRequest:
             # only interested in slot request
@@ -134,12 +142,21 @@ class LPDQBaseStation(Device):
             #print("time", self.env.now, "slot", slot, "slot raw", slot_raw)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 self.slots[slot] += 1
-        
+       
+    def __compute_slot(self, time):
+        raw_slot = time / self.slot_t * self.m
+        # notice that simple int() won't work
+        for i in range(self.m):
+            if abs(raw_slot - i) < self.jitter_range * 2:
+                return i
+        raise Exception("received at wrong time!")
+
     def _on_collision(self):
         time = self.env.now % 1
-        # print("collision time", time)
+        #print("collision time", self.env.now)
         if time < self.slot_t: # collision in the request slot
-            slot = int(time / self.slot_t * self.m) + 1
+            slot = self.__compute_slot(time)
+            print("collsion slot", slot, "time", time)
             if slot < self.m:
                 self.slots[slot] += 2
 

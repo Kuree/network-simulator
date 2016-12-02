@@ -1,5 +1,4 @@
 import random
-from collections import deque
 import simpy
 import math
 
@@ -36,15 +35,8 @@ class Device:
         self.guard = guard
 
         self.on_receive = FunctionDelegate()
-
         self.MTU = MTU
-
-        self.__transmission_queue = deque([])
-
         self.antenna = simpy.Resource(env, capacity=1)
-
-
-        self.env.process(self.__scheduler())
 
     def is_active(self):
         return self.__is_active
@@ -111,10 +103,8 @@ class Device:
         if last_chunk != 0:
             chunks.append(last_chunk)
         for chunk in chunks:
-            self.__transmission_queue.append((payload, chunk / self.rates[0], chunk, medium_index, False, self.antenna))
-
-    def _get_queue_len(self):
-        return len(self.__transmission_queue)
+            args = (payload, chunk / self.rates[0], chunk, medium_index, False, self.antenna)
+            self.env.process(self._schedule_send(*args))
 
     def _compute_mtu(self, time, rate):
         return int(math.floor(rate * time))
@@ -125,15 +115,6 @@ class Device:
             yield req
             self._send(payload, duration, size, medium_index, is_overhead)
             yield self.env.timeout(duration)
-
-
-    def __scheduler(self):
-        while True:
-            if len(self.__transmission_queue) == 0:
-                yield self.env.timeout(Device.PRECISION)
-            else:
-                args = self.__transmission_queue.popleft()
-                self.env.process(self._schedule_send(*args))
 
     def delay(self):
         # TODO: set the delay parameter
