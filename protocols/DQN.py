@@ -1,5 +1,5 @@
 import bootstrap
-
+import math
 from engine import Device
 
 class DQNObject:
@@ -10,9 +10,10 @@ class DQNObject:
 
 
 class DQNRequest(DQObject):
-    def __init__(self, slot):
+    def __init__(self, slots):
+        # NOTE: this is used as how many data slots the node requests
         super().__init__(DQObject.REQUEST)
-        self.slot = slot
+        self.slots = slots
 
 class DQNFeedback(DQObject):
     def __init__(self, slots, data_count, dtq, crq):
@@ -31,7 +32,7 @@ class DQNNode(Device):
     WAIT = 4
 
     def __init__(self, id, env, N, seed, jitter_range, rates, m, slot_t, feedback_t, guard):
-        MTU = self._compute_mtu(1 - slot_t - feedback_t - guard * (m + 1), rates[0])
+        MTU = self._compute_mtu((1 - guard) * N, rates[0])
         super().__init__(id, env, rates, seed=seed, jitter_range=jitter_range, guard=guard, MTU = MTU)
         #self.average_packet_size = average_packet_size
         self.m = m
@@ -54,18 +55,19 @@ class DQNNode(Device):
             payload = packet.payload
             if type(payload) != DQFeedback:
                 return # not valid packet
-            if payload.slots[self.chosen_slot] == 1: # it's a successful request
+            if payload.slots[self.chosen_slot][0] == 1: # it's a successful request
                 queue_position = 0
                 for i in range(self.chosen_slot):
-                    if payload.slots[i] == 1:
-                        queue_position += 1 # compute the dtq
-                self.sleep_time = payload.dtq + queue_position
+                    if payload.slots[i][0] == 1:
+                        queue_position += payload.slots[i][1] # compute the dtq
+                raw_sleep_time = payload.dtq + queue_position
+                self.sleep_time = raw_sleep_time + raw_sleep_time // self.N # take into account the overhead block
                 self.state = DQNNode.DTQ
             elif payload.slots[self.chosen_slot] > 1:
                 # enter crq
                 queue_position = 0
                 for i in range(self.chosen_slot):
-                    if payload.slots[i] > 1:
+                    if payload.slots[i][0] > 1:
                         queue_position += 1 # compute the crq position
                 self.sleep_time = payload.crq + queue_position
                 self.state = DQNNode.CRQ
@@ -90,7 +92,8 @@ class DQNNode(Device):
                     yield self.env.timeout(sleep_time)
                     slot_duration = self.slot_t / self.m - self.guard
                     slot_size = slot_duration * self.rates[0]
-                    self._send(DQRequest(self.chosen_slot), slot_duration, slot_size, 0, is_overhead = True)
+                    num_of_data_slots = math.ceil(size / (self.MTU / self.N))
+                    self._send(DQRequest(self.chosen_slot, num_of_data_slots), slot_duration, slot_size, 0, is_overhead = True)
 
                     # this will put it to sleep till contention result is out
                     self.state = DQNNode.WAIT
@@ -129,14 +132,15 @@ class DQNBaseStation(Device):
 
     def __bs_on_receive(self, packet):
         payload = packet.payload
-        if type(payload) == DQRequest:
+        if type(payload) == DQNRequest:
             # only interested in slot request
             slot_raw = self.env.now % 1 # TODO: calibrate with the receive window
             if slot_raw < 0:
                 slot_raw = 0
             slot = int(slot_raw / self.slot_t * self.m)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
-                self.slots[slot] += 1
+                self.slots[slot][1] += payload.slots
+                self.slots[slot][0] += 1
        
     def __compute_slot(self, time):
         raw_slot = time / self.slot_t * self.m
@@ -151,13 +155,13 @@ class DQNBaseStation(Device):
         if time < self.slot_t: # collision in the request slot
             slot = self.__compute_slot(time)
             if slot < self.m:
-                if self.slots[slot] == 0:
-                    self.slots[slot] += 2
+                if self.slots[slot][0] == 0:
+                    self.slots[slot][0] += 2
                 else:
-                    self.slots[slot] += 1
+                    self.slots[slot][0] += 1
 
     def __init_slots(self):
-        self.slots = [0 for i in range(self.m)]
+        self.slots = [[0, 0] for i in range(self.m)]
 
 
     def run(self):
@@ -170,15 +174,15 @@ class DQNBaseStation(Device):
 
             # increment the counter accordingly
             for i in range(len(self.slots)):
-                if self.slots[i] > 1:
+                if self.slots[i][0] > 1:
                     self.crq += 1
-                elif self.slots[i] == 1:
-                    self.dtq += 1
+                elif self.slots[i][0] == 1:
+                    self.dtq += self.slots[i][1]
 
             self.__init_slots()
             yield self.env.timeout(1)
             # decrease the counter
-            self.dtq = self.dtq - 1 if self.dtq > 0 else 0
+            self.dtq = self.dtq - N if self.dtq > N else 0
             self.crq = self.crq - 1 if self.crq > 0 else 0
         
 
