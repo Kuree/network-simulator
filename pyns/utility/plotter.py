@@ -1,7 +1,6 @@
 import argparse
 import os
 from pyns.utility.analyzer import Analyzer
-import matplotlib.pyplot as plt
 import json
 #import numpy
 
@@ -33,6 +32,8 @@ def parse_name(path, config):
 
 def plot(data, xscale):
     ''' plot the data points'''
+    import matplotlib.pyplot as plt
+    
     fig, ax = plt.subplots()
     for legend in data:
         data_pairs = data[legend]

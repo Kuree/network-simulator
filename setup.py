@@ -44,7 +44,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='sample setuptools development',
+    keywords='network simulation',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -58,6 +58,9 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy', 'blinker'],
+    install_requires=['numpy', 'blinker', 'simpy'],
+
+    setup_requires=['pytest-runner',],
+    tests_require=['pytest',],
 
 )

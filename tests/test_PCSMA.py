@@ -2,7 +2,7 @@ from pyns.engine import TransmissionMedium
 from pyns.protocols import CSMANode, CSMABaseStation
 import simpy
 
-def test(env, nodes, bs):
+def simpy_PCSMA(env, nodes, bs):
     def on_receive5(*args):
         assert abs(env.now - 1) < 0.1
     bs.on_receive += on_receive5
@@ -27,7 +27,7 @@ def test(env, nodes, bs):
     yield env.timeout(20)
 
 
-def main():
+def test_PCSMA():
     env = simpy.Environment()
     rates = [30]
     t = TransmissionMedium(env)
@@ -39,9 +39,9 @@ def main():
         node = CSMANode(i, env, rates, 0.5, guard = 0.01, seed = i, jitter_range = 0.001)
         t.add_device(node)
         nodes.append(node)
-    env.process(test(env, nodes, bs))
+    env.process(simpy_PCSMA(env, nodes, bs))
     
     env.run(until=40)
 
 if __name__ == "__main__":
-    main()
+    test_PCSMA()

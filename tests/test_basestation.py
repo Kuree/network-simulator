@@ -1,7 +1,7 @@
 import simpy
 from pyns.engine import Device, TransmissionMedium
  
-def test(env):
+def simpy_bs(env):
     MESSAGE1 = "TEST1"
     MESSAGE2 = "TEST2"
     def process(packet):
@@ -25,8 +25,11 @@ def test(env):
     assert t.is_busy() == True
 
 
-if __name__ == "__main__":
+def test_bs():
     env = simpy.Environment()
-    env.process(test(env))
+    env.process(simpy_bs(env))
 
     env.run(until = 20)
+
+if __name__ == "__main__":
+    test_bs()

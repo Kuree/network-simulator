@@ -3,7 +3,7 @@ from pyns.protocols import LPDQNode, LPDQBaseStation
 import simpy
 from pyns.utility.random_mock import RandomMock
 
-def test(env, nodes, bs):
+def simpy_LPDQ(env, nodes, bs):
     # using the example in paper
     # http://ieeexplore.ieee.org/xpls/icp.jsp?arnumber=7457611
     # setting up the random seeds
@@ -41,7 +41,7 @@ def test(env, nodes, bs):
 
     yield env.timeout(10)
 
-def main():
+def test_LPDQ():
     env = simpy.Environment()
     rates = [30]
     slot_t = 0.1
@@ -58,9 +58,9 @@ def main():
         node = LPDQNode(i, env, feedback_t = feedback_t, slot_t = slot_t, m=3, rates = rates, guard = 0.01, seed = i, jitter_range = 0.001)
         t.add_device(node)
         nodes.append(node)
-    env.process(test(env, nodes, bs))
+    env.process(simpy_LPDQ(env, nodes, bs))
     
     env.run(until=20)
 
 if __name__ == "__main__":
-    main()
+    test_LPDQ()

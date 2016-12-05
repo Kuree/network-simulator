@@ -2,7 +2,7 @@ from pyns.engine import TransmissionMedium
 from pyns.protocols import TDMANode, TDMABaseStation
 import simpy
 
-def test(env, nodes, bs):
+def simpy_TDMA(env, nodes, bs):
     def on_receive5(*args):
         assert abs(env.now - 6) < 0.1
     bs.on_receive += on_receive5
@@ -19,7 +19,7 @@ def test(env, nodes, bs):
     yield env.timeout(15)
 
 
-def main():
+def test_TDMA():
     env = simpy.Environment()
     rates = [30]
     t = TransmissionMedium(env)
@@ -31,9 +31,9 @@ def main():
         node = TDMANode(i, i-1, TOTAL, env, rates, guard = 0.01, seed = i, jitter_range = 0.001)
         t.add_device(node)
         nodes.append(node)
-    env.process(test(env, nodes, bs))
+    env.process(simpy_TDMA(env, nodes, bs))
     
     env.run(until=30)
 
 if __name__ == "__main__":
-    main()
+    test_TDMA()
