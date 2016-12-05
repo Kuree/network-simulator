@@ -1,7 +1,5 @@
-from bootstrap import *
-
-from engine import TransmissionMedium
-from protocols import TDMANode, TDMABaseStation
+from pyns.engine import TransmissionMedium
+from pyns.protocols import TDMANode, TDMABaseStation
 import simpy
 
 def test(env, nodes, bs):

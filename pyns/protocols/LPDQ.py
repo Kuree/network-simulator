@@ -1,6 +1,4 @@
-import bootstrap
-
-from engine import Device
+from pyns.engine import Device
 
 class DQObject:
     REQUEST = 0

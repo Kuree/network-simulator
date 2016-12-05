@@ -1,7 +1,5 @@
-import bootstrap
-
 import simpy
-from engine import Device, TransmissionMedium
+from pyns.engine import Device, TransmissionMedium
  
 def test(env):
     MESSAGE1 = "TEST1"

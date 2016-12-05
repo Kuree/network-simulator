@@ -1,8 +1,6 @@
-import bootstrap
-
-from engine import TransmissionMedium
+from pyns.engine import TransmissionMedium
 import simpy
-from engine import Device
+from pyns.engine import Device
 import logging
 
 if __name__ == "__main__":

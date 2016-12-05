@@ -1,6 +1,6 @@
 import argparse
 import os
-from analyzer import Analyzer
+from pyns.utility.analyzer import Analyzer
 import matplotlib.pyplot as plt
 import json
 #import numpy

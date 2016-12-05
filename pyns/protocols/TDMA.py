@@ -1,4 +1,4 @@
-from engine import Device 
+from pyns.engine import Device 
 
 class TDMANode(Device):
     def __init__(self, id, scheduled_time, total, env, rates, guard, seed, jitter_range):

@@ -1,9 +1,7 @@
-from bootstrap import *
-
-from engine import TransmissionMedium
-from protocols import LPDQNode, LPDQBaseStation
+from pyns.engine import TransmissionMedium
+from pyns.protocols import LPDQNode, LPDQBaseStation
 import simpy
-from random_mock import RandomMock
+from pyns.utility.random_mock import RandomMock
 
 def test(env, nodes, bs):
     # using the example in paper

@@ -1,5 +1,5 @@
 import simpy
-from . import TransmissionMedium
+from pyns.engine import TransmissionMedium
 from multiprocessing import Process
 
 class Simulator:

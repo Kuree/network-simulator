@@ -1,4 +1,4 @@
-from engine import Device
+from pyns.engine import Device
 
 class CSMANode(Device):
     def __init__(self, id, env, rates, p, seed, jitter_range, guard):

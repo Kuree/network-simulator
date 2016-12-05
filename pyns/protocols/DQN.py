@@ -1,6 +1,5 @@
-import bootstrap
 import math
-from engine import Device
+from pyns.engine import Device
 
 class DQNObject:
     REQUEST = 0
@@ -9,13 +8,13 @@ class DQNObject:
         self.type = obj_type
 
 
-class DQNRequest(DQObject):
+class DQNRequest(DQNObject):
     def __init__(self, slots):
         # NOTE: this is used as how many data slots the node requests
         super().__init__(DQObject.REQUEST)
         self.slots = slots
 
-class DQNFeedback(DQObject):
+class DQNFeedback(DQNObject):
     def __init__(self, slots, data_count, dtq, crq):
         self.slots = slots
         self.data_count
