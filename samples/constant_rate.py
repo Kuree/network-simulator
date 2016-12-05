@@ -1,6 +1,5 @@
-from bootstrap import *
-
-from protocols import create_basestation, create_node, ProtocolType
+from pyns.protocols import create_basestation, create_node, ProtocolType
+from pyns.engine import Simulator, SimArg
 import logging
 import numpy
 import sys
