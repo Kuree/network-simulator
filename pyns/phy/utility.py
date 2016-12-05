@@ -42,4 +42,19 @@ def get_noise_power(noise_figure, T=293):
     return k * T * 10**(noise_figure / 10) * B
 
 
+def get_distance(origin, destination):
+    '''returns Haversine distance between two points in km
+    '''
+    # this is from https://gist.github.com/rochacbruno/2883505
+    lat1, lon1 = origin
+    lat2, lon2 = destination
+    radius = 6371 # km
 
+    dlat = math.radians(lat2-lat1)
+    dlon = math.radians(lon2-lon1)
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = radius * c
+
+    return d
