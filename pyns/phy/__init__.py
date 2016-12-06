@@ -1,3 +1,3 @@
 from .layer import PHYLayer
-from .bpsk import BPSK
+from .psk import BPSK, QPSK
 import pyns.phy.utility

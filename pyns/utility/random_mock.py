@@ -19,15 +19,3 @@ class RandomMock:
         # use the old one
         return random.random()
 
-if __name__ == "__main__":
-    lst = list(range(10))
-    r = RandomMock(lst)
-    for i in lst:
-        assert r.randrange(10) == i
-    # test for different range
-    for i in range(10):
-        v = r.randrange(5)
-        assert v == (i % 5)
-
-    assert r.randint(2, 7) == 2
-        
