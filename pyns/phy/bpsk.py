@@ -1,5 +1,7 @@
 from pyns.phy import PHYLayer
 import scipy.special
+import math
+
 
 class BPSK(PHYLayer):
     def __init__(self, threshold):
@@ -7,9 +9,7 @@ class BPSK(PHYLayer):
 
     def compute_ber(self, ebn0, is_log=False):
         # use in db
-        if not is_log: ebn0 = 10 ** (ebn0 / 20)
-        return 0.5 * scipy.special.erfc(ebn0)
+        if is_log: ebn0 = 10 ** (ebn0 / 10)
+        return 0.5 * scipy.special.erfc(math.sqrt(ebn0))
 
 
-b = BPSK(10)
-print(b.compute_per(7, 20))

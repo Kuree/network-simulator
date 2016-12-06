@@ -22,7 +22,8 @@ class Device:
     PRECISION = 0.001
     ''' the base class for simulation node
     '''
-    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, guard = 0.01, MTU = 20):
+    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, 
+            guard = 0.01, MTU = 20, lat = 0, lng = 0):
         self.id = id
         self.env = env
         self.random = random.Random(seed)
@@ -33,6 +34,8 @@ class Device:
         self._busy_time = self.env.now
         self.__current_packet = None
         self.guard = guard
+        self.lat = lat
+        self.lng = lng
 
         self.should_send = False
 
@@ -59,16 +62,25 @@ class Device:
         # this needs to resolve several problem
         # 1. collision among packets
         # 2. scheduling to send packet at timestamp + duration + fixed time
-        # 3. message processing should be handled inside simpy loop
+        # 3. packet delay or drop the packet
         if not self.__is_active:
             return
         timestamp = packet.timestamp
+
+        # compute delay
+        delay = packet.get_delay(self)
+
+        if delay > 0:
+            timestamp += delay
+            packet.timestamp = timestamp
+
         duration = packet.duration
         if timestamp < self._busy_time:
             packet.valid = False
             if self.__current_packet is not None:
                 self.__current_packet.valid = False
             # signal the collision
+            # TODO: fixed the signal strength collision
             self._on_collision()
 
             # drop the packet. i.e. don't even bother to update the current packet

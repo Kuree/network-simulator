@@ -22,7 +22,8 @@ class TransmissionPacket:
     size: int
         the size of packet in bytes
     """
-    def __init__(self, timestamp, id, payload, duration, size, valid = True, is_overhead = False):
+    def __init__(self, timestamp, id, payload, duration, size, medium,
+            valid = True, is_overhead = False, lat = 0, lng = 0):
         """Initialize the TransmissionPacket class
         
         This should be used internally by the simulator. Other protocols are 
@@ -47,10 +48,21 @@ class TransmissionPacket:
         self.timestamp = timestamp
         self.payload = payload
         self.id = id
+        self.medium = medium
         self.duration = duration
         self.is_overhead = is_overhead
         self.valid = valid
         self.size = size
+
+        self.coordinates = (lat, lng)
+
+
+    def get_delay(self, device):
+        if self.medium.layer is None:
+            return 0
+        else:
+            # transmitting at speed of light
+            self.medium.layer.get_distance(self.coordinates, device) / 299792458
 
 class TransmissionMedium:
     """This is the main medium that nodes transmit to.
@@ -63,7 +75,7 @@ class TransmissionMedium:
     env: simpy.Environment
         simpy simulation environment
     """
-    def __init__(self, env, medium_name = "signal"):
+    def __init__(self, env, medium_name = "signal", layer = None):
         """Initialize the class
 
         Parameters
@@ -72,8 +84,11 @@ class TransmissionMedium:
             simpy simulation environment
         medium_name: string, optional
             a unique name assigned to the transmission
+        layer: PHY layer, optional
+            if set, it provides physical layer information for the simulation.
         """
         self.env = env
+        self.layer = layer
         self.__signal = blinker.signal(medium_name)
 
         # is_busy is useful for CSMA based protocol
@@ -85,14 +100,8 @@ class TransmissionMedium:
         # this is used to hold the current transmission
         self.__current_packet = None
 
-
         # setup logging
         self.__loggers = [] 
-        #= logging.getLogger(medium_name)
-        #ch = logging.StreamHandler(sys.stdout)
-        #ch.setLevel(logging.DEBUG)
-        #ch.setFormatter(TraceFormatter(env))
-        #self.logger.addHandler(ch)
 
     def add_logger(self, logger_name):
         """Adda a logger to the medium
@@ -129,7 +138,7 @@ class TransmissionMedium:
         timestamp = self.env.now + jitter
         if timestamp < 0:
             timestamp = abs(jitter)
-        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size, is_overhead=is_overhead))
+        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size, self, is_overhead=is_overhead))
         
     
     def is_busy(self):

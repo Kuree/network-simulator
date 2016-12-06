@@ -1,4 +1,5 @@
-import pyns.phy.utility
+from . import utility
+import math
 
 class PHYLayer:
     def __init__(self, threshold):
@@ -16,13 +17,13 @@ class PHYLayer:
 
     def __parse_points(self, point1, point2):
         if hasattr(point1, 'lat'):
-            lat2 = point1.lat
+            lat1 = point1.lat
         else:
-            lat2 = point1[0]
+            lat1 = point1[0]
         if hasattr(point1, "lng"):
-            lng2 = point1.lng
+            lng1 = point1.lng
         else:
-            lng2 = point1[1]
+            lng1 = point1[1]
 
         if hasattr(point2, 'lat'):
             lat2 = point1.lat
@@ -33,16 +34,19 @@ class PHYLayer:
         else:
             lng2 = point2[1]    
         return (lat1, lng1), (lat2, lng2)
- 
+
+    def get_distance(self, point1, point2):
+        point1, point2 = self.__parse_points(point1, point2)
+        distance = utility.get_distance(point1, point2)
+        distance = distance * 1000 # meters
+        return distance
+
     def get_path_loss(self, point1, point2, frequency):
         '''frequency is in hz
         returns db
         '''
-        # this is free path loss
+        # this is free space path loss
         # you need to override this method to get better estimation
-        point1, point2 = self.__parse_points(point1, point2)
-        distance = utility.get_distance(point1, point2)
-        distance = distance * 1000 # meters
-
-        return 20 * math.log(d, 10) + 20 * log(frequency, 10) - 20 * log(4 * math.pi/ 299792458, 10)
+        distance = self.get_distance(point1, point2)
+        return 20 * math.log(distance, 10) + 20 * math.log(frequency, 10) + 20 * math.log(4 * math.pi/ 299792458, 10)
 
