@@ -45,7 +45,8 @@ class ConstantSimulator(Simulator):
             nodes_to_trans = random.sample(nodes, num_of_trans)
             for n in nodes_to_trans:
                 n.send(dummy_payload, n.MTU)
-            yield env.timeout(1)
+            sleep_time = numpy.random.uniform(0.5, 1.5)
+            yield env.timeout(sleep_time)
 
 def main():
     parser = SimArg("Simulation with constant packet rate")

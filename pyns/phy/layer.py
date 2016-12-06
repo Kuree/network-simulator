@@ -4,12 +4,15 @@ class PHYLayer:
     def __init__(self, threshold):
         self.threshold = threshold
 
-    def compute_ber(self, ebn0):
+    def compute_ber(self, ebn0, is_log=False):
         return 0
 
-    def compute_per(self, ebn0, size):
-        ber = self.compute_ber(ebn0)
-        return 1 - (1 - ber)**size
+    def compute_per(self, ebn0, size, is_log=False):
+        '''
+        size is in byte
+        '''
+        ber = self.compute_ber(ebn0, is_log)
+        return 1 - (1 - ber)**(size * 8)
 
     def __parse_points(self, point1, point2):
         if hasattr(point1, 'lat'):
