@@ -2,20 +2,21 @@ import math
 
 
 def get_db(value):
-    return 10 * math.log(value)
+    return 10 * math.log(value, 10)
 
 def get_prx(ptx, gtx, grx, loss):
     '''
     get received signal power
     page 134
-    ptx: transmitted power, dbm
+    ptx: transmitted power, db
     gtx: gain of the transmit antenna, dbi
     grx: gain of the receive antenna, dbi
     loss: path loss, db
     '''
-    return ptx + gtx + grx - loss
+    return ptx - 30 + gtx + grx - loss # minus 30 to convert dbm to db
 
 def get_ebn0(Rb, B, Pn, prx, use_log = False):
+    print("Rb", Rb, "B", B, "Pn", Pn, "prx", prx)
     if use_log:
         return prx - get_db(Pn) + get_db(B) - get_db(Rb)
     else:
@@ -48,7 +49,7 @@ def get_noise_power(noise_figure, B, T=293):
     B: Nyquist bandwidth, hz
     return Pn
     '''
-    k = 1.38064852 # this is boltzmann's constant
+    k = 1.38064852 * (10** -23) # this is boltzmann's constant
     return k * T * 10**(noise_figure / 10) * B
 
 

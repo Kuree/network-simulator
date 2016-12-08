@@ -2,9 +2,10 @@ from . import utility
 import math
 
 class PHYLayer:
-    def __init__(self, threshold, bandwidth = 12500):
+    def __init__(self, threshold, bandwidth, bits_per_symbol):
         self.threshold = threshold
         self.bandwidth = bandwidth
+        self.bits_per_symbol = bits_per_symbol
 
     def compute_ber(self, ebn0, is_log=False):
         return 0
@@ -23,7 +24,7 @@ class PHYLayer:
         print("loss", loss)
         prx = utility.get_prx(ptx, gain1, gain2, loss)
         print("prx", prx)
-        rate *= rate * 8 # convert to bits TODO: need to decide using byte or bits
+        rate = rate * 8 # convert to bits TODO: need to decide using byte or bits
         ebn0 = utility.get_ebn0(rate, self.bandwidth, Pn, prx, use_log=True)
         return ebn0
 

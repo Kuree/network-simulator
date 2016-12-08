@@ -4,8 +4,8 @@ import math
 
 
 class BFSK(PHYLayer):
-    def __init__(self, threshold):
-        super().__init__(threshold)
+    def __init__(self, threshold, bandwidth=12500):
+        super().__init__(threshold, bandwidth, 1)
 
     def compute_ber(self, ebn0, is_log=False):
         # use in db

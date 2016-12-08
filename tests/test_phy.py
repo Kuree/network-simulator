@@ -1,10 +1,11 @@
 from pyns.phy import PHYLayer, BPSK
 from pyns.engine import Device, TransmissionMedium
+from pyns.phy import utility
 import math
 import simpy
 
 def test_FSPL():
-    layer = PHYLayer(0)
+    layer = PHYLayer(0, 10000, 1)
     p1 = (0, 0)
     p2 = (0.1, 0.1)
     frequency = 10 * 10**6
@@ -22,7 +23,7 @@ def test_path_loss():
     env = simpy.Environment()
     d1 = Device(env = env, id =0, rates=[20], lat=0.1, lng=0.1)
     d2 = Device(env = env, id =1, rates=[20], lat=0.1, lng=0.1)
-    layer = PHYLayer(120)
+    layer = PHYLayer(120, 10000, 1)
     t = TransmissionMedium(env, layer=layer)
 
     t.add_device(d1)
@@ -54,10 +55,19 @@ def test_path_loss():
 
     env.run(until=10)
 
+
+def test_noise_power():
+    # based on example 3.1.4 page 88
+    noise_figure = 6
+    bandwidth = 20* (10**6)
+    noise_power = utility.get_noise_power(noise_figure, bandwidth)
+    assert abs(noise_power - 10**(-125 / 10)) < 0.01
+
+
 def test_ebn0():
-    layer = PHYLayer(42) # 42 is the meaning of life
+    layer = PHYLayer(42, 12500, 1) # 42 is the meaning of life
     point1 = (0, 0)
-    point2 = (0.01, 0.01)
+    point2 = (0.1, 0.1)
     rate = 20
     frequency = 915 * (10**6) # 915 MHz
     noise_figure = 6 # 6 db
@@ -72,3 +82,4 @@ if __name__ == "__main__":
     test_BPSK()
     test_path_loss()
     test_ebn0()
+    test_noise_power()

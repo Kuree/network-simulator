@@ -4,8 +4,8 @@ import math
 
 
 class BPSK(PHYLayer):
-    def __init__(self, threshold):
-        super().__init__(threshold)
+    def __init__(self, threshold, bandwidth = 12500):
+        super().__init__(threshold, bandwidth, 1)
 
     def compute_ber(self, ebn0, is_log=False):
         # use in db
@@ -13,8 +13,8 @@ class BPSK(PHYLayer):
         return 0.5 * scipy.special.erfc(math.sqrt(ebn0))
 
 class QPSK(PHYLayer):
-    def __init__(self, threshold):
-        super().__init__(threshold)
+    def __init__(self, threshold, bandwidth = 12500):
+        super().__init__(threshold, bandwidth, 2)
 
     def compute_ber(self, ebn0, is_log=False):
         # use in db
