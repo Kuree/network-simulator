@@ -57,12 +57,18 @@ def test_path_loss():
 def test_ebn0():
     layer = PHYLayer(42) # 42 is the meaning of life
     point1 = (0, 0)
-    point2 = (0.1, 0.1)
-    ebno = layer.get_ebn0(point1, point2, noise)
-    pass
+    point2 = (0.01, 0.01)
+    rate = 20
+    frequency = 915 * (10**6) # 915 MHz
+    noise_figure = 6 # 6 db
+    gain = 0
+    ptx = 14
+    ebn0 = layer.get_ebn0(ptx, point1, point2, rate, frequency, noise_figure, gain, gain)
+    print(ebn0)
 
 
 if __name__ == "__main__":
     test_FSPL()
     test_BPSK()
     test_path_loss()
+    test_ebn0()

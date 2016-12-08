@@ -22,7 +22,7 @@ class TransmissionPacket:
     size: int
         the size of packet in bytes
     """
-    def __init__(self, timestamp, id, payload, duration, size, medium, frequency,
+    def __init__(self, timestamp, id, payload, duration, size, medium, frequency, ptx,
             valid = True, is_overhead = False, lat = 0, lng = 0):
         """Initialize the TransmissionPacket class
         
@@ -50,6 +50,7 @@ class TransmissionPacket:
         self.id = id
         self.medium = medium
         self.duration = duration
+        self.ptx = ptx
         self.is_overhead = is_overhead
         self.valid = valid
         self.size = size
@@ -158,7 +159,7 @@ class TransmissionMedium:
         if timestamp < 0:
             timestamp = abs(jitter)
         self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, 
-            size, self, is_overhead=is_overhead, frequency=frequency))
+            size, self, is_overhead=is_overhead, frequency=frequency, ptx=device.ptx))
         
     
     def is_busy(self):

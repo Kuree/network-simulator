@@ -4,7 +4,7 @@ import math
 def get_db(value):
     return 10 * math.log(value)
 
-def get_prx(p_tx, gtx, grx, loss):
+def get_prx(ptx, gtx, grx, loss):
     '''
     get received signal power
     page 134
@@ -15,8 +15,11 @@ def get_prx(p_tx, gtx, grx, loss):
     '''
     return ptx + gtx + grx - loss
 
-def get_ebn0(self, Rb, B, Pn, prx):
-    return prx / Pn * B / Rb
+def get_ebn0(Rb, B, Pn, prx, use_log = False):
+    if use_log:
+        return prx - get_db(Pn) + get_db(B) - get_db(Rb)
+    else:
+        return prx / Pn * B / Rb
 
 
 def get_prx_min(ebn0, Rb, B, Pn):
@@ -36,7 +39,7 @@ def get_prx_min(ebn0, Rb, B, Pn):
     return ebn0 * Rb / B * Pn
 
 
-def get_noise_power(noise_figure, T=293):
+def get_noise_power(noise_figure, B, T=293):
     ''' 
     get noise power based on noise figure
     page 133

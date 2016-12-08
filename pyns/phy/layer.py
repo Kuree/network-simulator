@@ -16,12 +16,15 @@ class PHYLayer:
         ber = self.compute_ber(ebn0, is_log)
         return 1 - (1 - ber)**(size * 8)
 
-    def get_ebn0(self, point1, point2, rate, frequency, noise_figure, gain1, gain2):
-        Pn = utility.get_noise_power(noise_fiugre)
+    def get_ebn0(self, ptx, point1, point2, rate, frequency, noise_figure, gain1, gain2):
+        Pn = utility.get_noise_power(noise_figure, self.bandwidth)
+        print("noise power", Pn)
         loss = self.get_path_loss(point1, point2, frequency)
-        prx = utility.get_prx(gain1, gain2, loss)
+        print("loss", loss)
+        prx = utility.get_prx(ptx, gain1, gain2, loss)
+        print("prx", prx)
         rate *= rate * 8 # convert to bits TODO: need to decide using byte or bits
-        ebn0 = utility.get_ebn0(rate, self.bandwidth, Pn, prx)
+        ebn0 = utility.get_ebn0(rate, self.bandwidth, Pn, prx, use_log=True)
         return ebn0
 
 
