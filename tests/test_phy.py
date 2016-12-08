@@ -63,18 +63,30 @@ def test_noise_power():
     noise_power = utility.get_noise_power(noise_figure, bandwidth)
     assert abs(noise_power - 10**(-125 / 10)) < 0.01
 
+def test_get_prx_min():
+    # page 135 example 3.7.1 (b)
+    ebn0 = 10 ** ( 10.2/10)
+    Rb = 30 * (10**6)
+    B = 20 * (10**6)
+    noise_figure = 6
+    Pn = utility.get_noise_power(noise_figure, B)
+    prx_min = utility.get_prx_min(ebn0, Rb, B, Pn)
+    prx_min = 10 * math.log(prx_min * 1000, 10)
+    assert abs(prx_min + 83) < 0.05
 
 def test_ebn0():
-    layer = PHYLayer(42, 12500, 1) # 42 is the meaning of life
+    # reversed the problem using well-selected points
+    # page 135 example 3.7.1 (c)
+    layer = PHYLayer(42, 20* (10**6), 1) # 20 Mhz bandwidth
     point1 = (0, 0)
-    point2 = (0.1, 0.1)
-    rate = 20
-    frequency = 915 * (10**6) # 915 MHz
+    point2 = (0.00069,0.00069) # ensure the 
+    rate = 30 * (10**6) # 30 Mbit/s
+    frequency = 5 * (10 ** 9) # 5 Ghz
     noise_figure = 6 # 6 db
-    gain = 0
-    ptx = 14
+    gain = 2 #dbi
+    ptx = 0.1 # 100 mw
     ebn0 = layer.get_ebn0(ptx, point1, point2, rate, frequency, noise_figure, gain, gain)
-    print(ebn0)
+    assert abs(ebn0 - 10.2) < 0.1
 
 
 if __name__ == "__main__":
@@ -82,4 +94,5 @@ if __name__ == "__main__":
     test_BPSK()
     test_path_loss()
     test_ebn0()
+    test_get_prx_min()
     test_noise_power()

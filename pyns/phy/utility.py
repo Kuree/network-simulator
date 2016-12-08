@@ -8,19 +8,21 @@ def get_prx(ptx, gtx, grx, loss):
     '''
     get received signal power
     page 134
-    ptx: transmitted power, db
+    ptx: transmitted power, dbm
     gtx: gain of the transmit antenna, dbi
     grx: gain of the receive antenna, dbi
     loss: path loss, db
-    '''
-    return ptx - 30 + gtx + grx - loss # minus 30 to convert dbm to db
 
-def get_ebn0(Rb, B, Pn, prx, use_log = False):
-    print("Rb", Rb, "B", B, "Pn", Pn, "prx", prx)
-    if use_log:
-        return prx - get_db(Pn) + get_db(B) - get_db(Rb)
-    else:
-        return prx / Pn * B / Rb
+    return: prx, dbm
+    '''
+    return ptx + gtx + grx - loss 
+
+def get_ebn0(Rb, B, Pn, prx):
+    '''
+    prx: dbm
+    '''
+    prx = 10 ** (prx / 10) / 1000
+    return prx / Pn * B / Rb
 
 
 def get_prx_min(ebn0, Rb, B, Pn):

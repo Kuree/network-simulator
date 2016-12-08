@@ -75,6 +75,7 @@ class TransmissionPacket:
             # compute the path loss
             layer = self.medium.layer
             loss = layer.get_path_loss(self.coordinates, device, self.frequency)
+            # TODO: switch to PRX once it's done
             return loss > layer.threshold
 
     def _check_valid(self, device):
