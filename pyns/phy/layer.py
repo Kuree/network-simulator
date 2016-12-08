@@ -59,5 +59,8 @@ class PHYLayer:
         # this is free space path loss
         # you need to override this method to get better estimation
         distance = self.get_distance(point1, point2)
-        return 20 * math.log(distance, 10) + 20 * math.log(frequency, 10) + 20 * math.log(4 * math.pi/ 299792458, 10)
+        if distance == 0:
+            return 0
+        else:
+            return 20 * math.log(distance, 10) + 20 * math.log(frequency, 10) + 20 * math.log(4 * math.pi/ 299792458, 10)
 

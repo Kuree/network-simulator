@@ -21,7 +21,7 @@ def test_BPSK():
 def test_path_loss():
     rates = [20]
     env = simpy.Environment()
-    d1 = Device(env = env, id =0, rates=[20], lat=0.1, lng=0.1)
+    d1 = Device(env = env, id =0, rates=[20], lat=0, lng=0)
     d2 = Device(env = env, id =1, rates=[20], lat=0.1, lng=0.1)
     layer = PHYLayer(120, 10000, 1)
     t = TransmissionMedium(env, layer=layer)
