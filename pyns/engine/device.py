@@ -23,7 +23,7 @@ class Device:
     ''' the base class for simulation node
     '''
     def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, 
-            guard = 0.01, MTU = 20, lat = 0, lng = 0):
+            guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000]):
         self.id = id
         self.env = env
         self.random = random.Random(seed)
@@ -36,6 +36,7 @@ class Device:
         self.guard = guard
         self.lat = lat
         self.lng = lng
+        self.frequencies = frequencies
 
         self.should_send = False
 
@@ -68,7 +69,7 @@ class Device:
         timestamp = packet.timestamp
 
         # compute delay
-        delay = packet.get_delay(self)
+        delay = packet._get_delay(self)
 
         if delay > 0:
             timestamp += delay
@@ -82,16 +83,19 @@ class Device:
             # signal the collision
             # TODO: fixed the signal strength collision
             self._on_collision()
-
+            return
             # drop the packet. i.e. don't even bother to update the current packet
         else:
+            # test the signal strength
+            if packet.medium.layer is not None:
+                if packet._should_drop(self):
+                    return # don't bother
             self.__current_packet = packet
-        
-        self._busy_time = max(self._busy_time, timestamp + duration)
+            self._busy_time = max(self._busy_time, timestamp + duration)
 
-        # add to event queue
-        self.env.process(self.wait_to_process(packet))
-       
+            # add to event queue
+            self.env.process(self.wait_to_process(packet))
+   
     def wait_to_process(self, packet):
         # pretending receiving the transmission
         time_to_sleep = packet.timestamp + packet.duration - self.env.now
@@ -108,13 +112,15 @@ class Device:
     def _send(self, payload, duration, size, medium_index, is_overhead):
         if len(self._medium) == 0:
             raise Exception("Device has no medium attached")
-        self._medium[medium_index][1](payload, duration, size, is_overhead)
+        # TODO: fix frequency selection
+        self._medium[medium_index][1](payload, duration, size, is_overhead, self.frequencies[0])
 
     def send(self, payload, size, medium_index = 0):
         # TODO: fix rate
         # doing fragmentation here
         # NOTE: the actual payload won't be sliced into chunks
-        #       this is for simulation only
+        #       this is for simulation only. in the future when doing bit-level simulation,
+        #       this need to be fixed..
         last_chunk = size % self.rates[0]
         chunks = [self.MTU for i in range(int(size // self.rates[0]))]
         if last_chunk != 0:

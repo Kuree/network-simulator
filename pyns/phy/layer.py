@@ -2,8 +2,9 @@ from . import utility
 import math
 
 class PHYLayer:
-    def __init__(self, threshold):
+    def __init__(self, threshold, bandwidth = 12500):
         self.threshold = threshold
+        self.bandwidth = bandwidth
 
     def compute_ber(self, ebn0, is_log=False):
         return 0
@@ -14,6 +15,15 @@ class PHYLayer:
         '''
         ber = self.compute_ber(ebn0, is_log)
         return 1 - (1 - ber)**(size * 8)
+
+    def get_ebn0(self, point1, point2, rate, frequency, noise_figure, gain1, gain2):
+        Pn = utility.get_noise_power(noise_fiugre)
+        loss = self.get_path_loss(point1, point2, frequency)
+        prx = utility.get_prx(gain1, gain2, loss)
+        rate *= rate * 8 # convert to bits TODO: need to decide using byte or bits
+        ebn0 = utility.get_ebn0(rate, self.bandwidth, Pn, prx)
+        return ebn0
+
 
     def __parse_points(self, point1, point2):
         if hasattr(point1, 'lat'):
@@ -26,7 +36,7 @@ class PHYLayer:
             lng1 = point1[1]
 
         if hasattr(point2, 'lat'):
-            lat2 = point1.lat
+            lat2 = point2.lat
         else:
             lat2 = point2[0]
         if hasattr(point2, "lng"):

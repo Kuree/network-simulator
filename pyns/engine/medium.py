@@ -22,7 +22,7 @@ class TransmissionPacket:
     size: int
         the size of packet in bytes
     """
-    def __init__(self, timestamp, id, payload, duration, size, medium,
+    def __init__(self, timestamp, id, payload, duration, size, medium, frequency,
             valid = True, is_overhead = False, lat = 0, lng = 0):
         """Initialize the TransmissionPacket class
         
@@ -53,16 +53,35 @@ class TransmissionPacket:
         self.is_overhead = is_overhead
         self.valid = valid
         self.size = size
+      
+        # this is needed for compute ber/path loss
+        self.frequency = frequency
 
         self.coordinates = (lat, lng)
 
 
-    def get_delay(self, device):
+    def _get_delay(self, device):
         if self.medium.layer is None:
             return 0
         else:
             # transmitting at speed of light
-            self.medium.layer.get_distance(self.coordinates, device) / 299792458
+            return self.medium.layer.get_distance(self.coordinates, device) / 299792458
+
+    def _should_drop(self, device):
+        if self.medium.layer is None:
+            return False
+        else:
+            # compute the path loss
+            layer = self.medium.layer
+            loss = layer.get_path_loss(self.coordinates, device, self.frequency)
+            return loss > layer.threshold
+
+    def _check_valid(self, device):
+        if self.medium.layer is None:
+            return self.valid
+        else:
+            layer = self.medium.layer
+            pass
 
 class TransmissionMedium:
     """This is the main medium that nodes transmit to.
@@ -124,21 +143,22 @@ class TransmissionMedium:
             Any device instance
         '''
         self.__subscribe(device._on_receive)
-        def _transmit(payload, duration, size, is_overhead):
-            self.__transmit(device, payload, duration, size, is_overhead)
+        def _transmit(payload, duration, size, is_overhead, frequency):
+            self.__transmit(device, payload, duration, size, is_overhead, frequency)
         device._medium.append((self, _transmit))
 
     def __subscribe(self, callback):
         self.__signal.connect(callback)
 
-    def __transmit(self, device, payload, duration, size, is_overhead):
+    def __transmit(self, device, payload, duration, size, is_overhead, frequency):
         """ called when device wants to transmit data
         """
         jitter = device.jitter()
         timestamp = self.env.now + jitter
         if timestamp < 0:
             timestamp = abs(jitter)
-        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, size, self, is_overhead=is_overhead))
+        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, 
+            size, self, is_overhead=is_overhead, frequency=frequency))
         
     
     def is_busy(self):

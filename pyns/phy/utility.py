@@ -1,8 +1,8 @@
 import math
 
 
-def get_dbw(watts):
-    return 10 * math.log(watts)
+def get_db(value):
+    return 10 * math.log(value)
 
 def get_prx(p_tx, gtx, grx, loss):
     '''
@@ -15,6 +15,9 @@ def get_prx(p_tx, gtx, grx, loss):
     '''
     return ptx + gtx + grx - loss
 
+def get_ebn0(self, Rb, B, Pn, prx):
+    return prx / Pn * B / Rb
+
 
 def get_prx_min(ebn0, Rb, B, Pn):
     '''
@@ -24,7 +27,11 @@ def get_prx_min(ebn0, Rb, B, Pn):
     Rb: bit rate bits/second
     B: bandwidth
     Pn: noise power
-    NOTE: this is not in db
+    return prx
+
+    NOTE 
+    ----
+    This is not in db
     '''
     return ebn0 * Rb / B * Pn
 
