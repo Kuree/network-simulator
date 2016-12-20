@@ -11,5 +11,5 @@
   },
   "xscale": 100000,
   "xlabel": "Network load (%)",
-  "ylabel": "Network Utility"
+  "ylabel": "Network Utility",
 }

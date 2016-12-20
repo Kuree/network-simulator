@@ -1,6 +1,7 @@
 from . import TDMANode, TDMABaseStation
 from . import CSMANode, CSMABaseStation
 from . import LPDQNode, LPDQBaseStation
+from . import DQNNode, DQNBaseStation
 
 import json
 import inspect
@@ -9,6 +10,7 @@ class ProtocolType:
     TDMA = 0
     CSMA = 1
     LPDQ = 2
+    DQN  = 3
 
 def create_basestation(protocol_type, id, env, config, special_arg = None):
     with open(config) as f:
@@ -24,6 +26,9 @@ def create_basestation(protocol_type, id, env, config, special_arg = None):
     elif protocol_type == ProtocolType.LPDQ:
         args = __process_args(LPDQBaseStation.__init__, args, special_arg)
         return LPDQBaseStation(**args)
+    elif protocol_type == ProtocolType.DQN:
+        args = __process_args(DQNBaseStation.__init__, args, special_arg)
+        return DQNBaseStation(**args)
     return None
 
 def create_node(protocol_type, id, env, config, special_arg = None):
@@ -40,6 +45,9 @@ def create_node(protocol_type, id, env, config, special_arg = None):
     elif protocol_type == ProtocolType.LPDQ:
         args = __process_args(LPDQNode.__init__, args, special_arg)
         return LPDQNode(**args)
+    elif protocol_type == ProtocolType.DQN:
+        args = __process_args(DQNNode.__init__, args, special_arg)
+        return DQNNode(**args)
     return None
 
 def __process_args(func, args, special_arg):

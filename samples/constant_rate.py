@@ -1,5 +1,5 @@
 from pyns.protocols import create_basestation, create_node, ProtocolType
-from pyns.engine import Simulator, SimArg
+from pyns.engine import Simulator, SimArg, TraceFormatter, TransmissionMedium
 import logging
 import numpy
 import sys

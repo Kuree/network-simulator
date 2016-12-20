@@ -19,6 +19,7 @@ class QPSK(PHYLayer):
     def compute_ber(self, ebn0, is_log=False):
         # use in db
         if is_log: ebn0 = 10 ** (ebn0 / 10)
+        # QPSK union bound
         return 2 * scipy.special.erfc(math.sqrt(2 * ebn0)) + \
                 scipy.special.erfc(math.sqrt(4 * ebn0))
 

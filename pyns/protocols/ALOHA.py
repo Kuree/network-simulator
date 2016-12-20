@@ -7,6 +7,7 @@ class ALOHANode(Device):
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         with antenna.request() as req:
+            yield req
             self._send(payload, duration, size, medium_index, is_overhead)
             self.should_send = False
 
