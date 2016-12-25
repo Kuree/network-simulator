@@ -18,30 +18,25 @@ def simpy_DQN(env, nodes, bs):
     for i in range(8):
         nodes[i].send("", nodes[i].MTU / 16 * 10) # send 10 data slots
 
+    receive_dict = {}
+
     def on_receive(packet):
         payload = packet.payload
         id = packet.id 
-        #if type(payload) == str:
-        #    if id == 5:
-        #        assert abs(env.now - 26.8) < 0.1
-        #    elif id == 6:
-        #        assert abs(env.now - 36.8) < 0.1
-        #    elif id == 1:
-        #        assert abs(env.now - 46.8) < 0.1
-        #    elif id == 2:
-        #        assert abs(env.now - 56.8) < 0.1
-        #    elif id == 3:
-        #        assert abs(env.now - 76.8) < 0.1
-        #    elif id == 4:
-        #        assert abs(env.now - 86.8) < 0.1
-        #    elif id == 7:
-        #        assert abs(env.now - 96.8) < 0.1
-        #    elif id == 8:
-        #        assert abs(env.now - 106.8) < 0.1
-
+        if type(payload) == str:
+            receive_dict[id] = env.now
     bs.on_receive += on_receive
 
-    yield env.timeout(10)
+    yield env.timeout(100)
+    # assert the time
+    assert abs(receive_dict[5] - 12) < 0.1
+    assert abs(receive_dict[6] - 23) < 0.1
+    assert abs(receive_dict[1] - 33) < 0.1
+    assert abs(receive_dict[2] - 44) < 0.1
+    assert abs(receive_dict[3] - 55) < 0.1
+    assert abs(receive_dict[4] - 65) < 0.1
+    assert abs(receive_dict[7] - 76) < 0.1
+    assert abs(receive_dict[8] - 87) < 0.1
 
 def test_DQN():
     env = simpy.Environment()
@@ -64,7 +59,7 @@ def test_DQN():
         nodes.append(node)
     env.process(simpy_DQN(env, nodes, bs))
     
-    env.run(until=60)
+    env.run(until=150)
 
 if __name__ == "__main__":
     test_DQN()
