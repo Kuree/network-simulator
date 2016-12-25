@@ -122,8 +122,8 @@ class Device:
         # NOTE: the actual payload won't be sliced into chunks
         #       this is for simulation only. in the future when doing bit-level simulation,
         #       this need to be fixed..
-        last_chunk = size % self.rates[0]
-        chunks = [self.MTU for i in range(int(size // self.rates[0]))]
+        last_chunk = size % self.MTU
+        chunks = [self.MTU for i in range(int(size // self.MTU))]
         if last_chunk != 0:
             self.should_send = True
             chunks.append(last_chunk)
