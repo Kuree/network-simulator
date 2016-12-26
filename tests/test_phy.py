@@ -1,6 +1,6 @@
 from pyns.phy import PHYLayer, BPSK, QPSK
 from pyns.engine import Device, TransmissionMedium
-from pyns.phy import utility
+from pyns.phy import utility, get_planit_path_loss
 import math
 import simpy
 
@@ -86,6 +86,20 @@ def test_ebn0():
     ebn0 = layer.get_ebn0(ptx, point1, point2, rate, frequency, noise_figure, gain, gain)
     assert abs(ebn0 - 10.47) < 0.1
 
+
+def test_planit():
+    url = "https://www.eg.bucknell.edu/planit/api/"
+    api_key = "eyJhbGciOiJIUzI1NiJ9.IjU4M2M3Y2EyNDdlZmE2MzgwMmI1NzNjOCI._fMAFEPDDGiAv9z6uhAKZVeBQx8TyCH1WzkzZzuXQew"
+
+    get_path_loss = get_planit_path_loss(url, api_key)
+
+
+    a=(-76.881249, 40.954899)
+    b=(-76.897619, 40.955291)
+
+    assert get_path_loss(a, b, 900*10**6) == 136.1580257011434
+
+
 if __name__ == "__main__":
     test_FSPL()
     test_BPSK()
@@ -93,3 +107,4 @@ if __name__ == "__main__":
     test_ebn0()
     test_get_prx_min()
     test_noise_power()
+    test_planit()
