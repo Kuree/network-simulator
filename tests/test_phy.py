@@ -3,6 +3,7 @@ from pyns.engine import Device, TransmissionMedium
 from pyns.phy import utility, get_planit_path_loss
 import math
 import simpy
+import time
 
 def test_FSPL():
     layer = PHYLayer(0, 10000, 1)
@@ -98,7 +99,11 @@ def test_planit():
     b=(-76.897619, 40.955291)
 
     assert get_path_loss(a, b, 900*10**6) == 136.1580257011434
-
+    # test cache
+    start = time.time()
+    assert get_path_loss(a, b, 900*10**6) == 136.1580257011434
+    end = time.time()
+    assert end - start < 0.1
 
 if __name__ == "__main__":
     test_FSPL()
