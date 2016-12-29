@@ -12,43 +12,67 @@ class ProtocolType:
     LPDQ = 2
     DQN  = 3
 
+SPECIAL_ATTRIBUTES = ["lat", "lng", "path_loss"]
+
 def create_basestation(protocol_type, id, env, config, special_arg = None):
-    with open(config) as f:
-        args = json.load(f)
+    args = __load_config(config)
     args["id"] = id
     args["env"] = env
+    bs = None
     if protocol_type == ProtocolType.TDMA:
         args = __process_args(TDMABaseStation.__init__, args, special_arg)
-        return TDMABaseStation(**args)
+        bs = TDMABaseStation(**args)
     elif protocol_type == ProtocolType.CSMA:
         args = __process_args(CSMABaseStation.__init__, args, special_arg)
-        return CSMABaseStation(**args)
+        bs = CSMABaseStation(**args)
     elif protocol_type == ProtocolType.LPDQ:
         args = __process_args(LPDQBaseStation.__init__, args, special_arg)
-        return LPDQBaseStation(**args)
+        bs = LPDQBaseStation(**args)
     elif protocol_type == ProtocolType.DQN:
         args = __process_args(DQNBaseStation.__init__, args, special_arg)
-        return DQNBaseStation(**args)
-    return None
+        bs = DQNBaseStation(**args)
+    
+    for name in SPECIAL_ATTRIBUTES:
+        __set_attributes(bs, config, name)
+
+    return bs
 
 def create_node(protocol_type, id, env, config, special_arg = None):
-    with open(config) as f:
-        args = json.load(f)
+    args = __load_config(config)
     args["id"] = id
     args["env"] = env
+    node = None
     if protocol_type == ProtocolType.TDMA:
         args = __process_args(TDMANode.__init__, args, special_arg)
-        return TDMANode(**args)
+        node = TDMANode(**args)
     elif protocol_type == ProtocolType.CSMA:
         args = __process_args(CSMANode.__init__, args, special_arg)
-        return CSMANode(**args)
+        node = CSMANode(**args)
     elif protocol_type == ProtocolType.LPDQ:
         args = __process_args(LPDQNode.__init__, args, special_arg)
-        return LPDQNode(**args)
+        node = LPDQNode(**args)
     elif protocol_type == ProtocolType.DQN:
         args = __process_args(DQNNode.__init__, args, special_arg)
-        return DQNNode(**args)
-    return None
+        node = DQNNode(**args)
+    
+    for name in SPECIAL_ATTRIBUTES:
+        __set_attributes(node, config, name)
+
+    return node
+
+def __load_config(config):
+    if type(config) == str:
+        with open(config) as f:
+            return json.load(f)
+    elif type(config) == dict:
+        return config
+    else:
+        return {} 
+
+def __set_attributes(device, config, name):
+    if device is not None and name in config:
+        setattr(device, name, config[name])
+
 
 def __process_args(func, args, special_arg):
     # remove unused args

@@ -2,7 +2,7 @@ import simpy
 import blinker
 import logging
 from pyns.engine.trace import TraceFormatter
-
+import random
 
 class TransmissionPacket:
     """This is the class used to represent a packet sent to the medium
@@ -22,7 +22,7 @@ class TransmissionPacket:
     size: int
         the size of packet in bytes
     """
-    def __init__(self, timestamp, id, payload, duration, size, medium, frequency, ptx,
+    def __init__(self, sender, timestamp, id, payload, duration, size, medium, frequency, ptx,
             valid = True, is_overhead = False, lat = 0, lng = 0):
         """Initialize the TransmissionPacket class
         
@@ -44,7 +44,7 @@ class TransmissionPacket:
         is_overhead: bool, optional
             if the packet is protocol overhead
         """
-        
+        self.sender = sender
         self.timestamp = timestamp
         self.payload = payload
         self.id = id
@@ -69,7 +69,7 @@ class TransmissionPacket:
             return self.medium.layer.get_distance(self.coordinates, device) / 299792458
 
     def _should_drop(self, device):
-        if self.medium.layer is None:
+        if self.medium.layer is None or self.medium.layer.threshold is None:
             return False
         else:
             # compute the path loss
@@ -78,12 +78,18 @@ class TransmissionPacket:
             # TODO: switch to PRX once it's done
             return loss > layer.threshold
 
-    def _check_valid(self, device):
+    def _check_valid(self, receiver):
         if self.medium.layer is None:
             return self.valid
         else:
+            rate = self.size / self.duration
             layer = self.medium.layer
-            pass
+            ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate, 
+                self.frequency, self.medium.noise_figure, self.sender.gain, receiver.gain)
+            per = layer.compute_per(ebn0, self.size)
+            valid = random.random() < per
+            return valid
+
 
 class TransmissionMedium:
     """This is the main medium that nodes transmit to.
@@ -96,7 +102,7 @@ class TransmissionMedium:
     env: simpy.Environment
         simpy simulation environment
     """
-    def __init__(self, env, medium_name = "signal", layer = None):
+    def __init__(self, env, medium_name = "signal", layer = None, noise_figure=6):
         """Initialize the class
 
         Parameters
@@ -110,6 +116,7 @@ class TransmissionMedium:
         """
         self.env = env
         self.layer = layer
+        self.noise_figure = 6
         self.__signal = blinker.signal(medium_name)
 
         # is_busy is useful for CSMA based protocol
@@ -159,11 +166,11 @@ class TransmissionMedium:
         timestamp = self.env.now + jitter
         if timestamp < 0:
             timestamp = abs(jitter)
-        self.__signal.send(TransmissionPacket(timestamp, device.id, payload, duration, 
+        self.__signal.send(TransmissionPacket(device, timestamp, device.id, payload, duration, 
             size, self, is_overhead=is_overhead, frequency=frequency, ptx=device.ptx))
         
     
-    def is_busy(self):
+    def is_busy(self, device):
         """call when you need to know if the transmission is busy
         
         Note
@@ -171,7 +178,11 @@ class TransmissionMedium:
         This is used internally by the simulatior. Device class should use its class method
         instead
         """
-        return self.env.now <= self.__free_time
+        channel_busy = self.env.now < self.__free_time
+        if channel_busy:
+            return self.__current_packet._check_valid(device)
+        else:
+            return False
 
     def _listen_busy(self, packet):
         duration = packet.duration

@@ -56,6 +56,12 @@ class PHYLayer:
         '''frequency is in hz
         returns db
         '''
+        # override the original one
+        if hasattr(point1, "path_loss"):
+            return point1.path_loss
+        if hasattr(point2, "path_loss"):
+            return point2.path_loss
+
         # this is free space path loss
         # you need to override this method to get better estimation
         distance = self.get_distance(point1, point2)

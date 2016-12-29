@@ -18,6 +18,12 @@ def get_planit_path_loss(entry_point, api_key):
     r = requests.post(url_itwom, json=args)
     itwomparam = r.json()["result"]
     def get_path_loss(point1, point2, frequency):
+        # override the original one
+        if hasattr(point1, "path_loss"):
+            return point1.path_loss
+        if hasattr(point2, "path_loss"):
+            return point2.path_loss
+
         if frequency in GLOBAL_CACHE and (point1, point2) in GLOBAL_CACHE[frequency]:
             return GLOBAL_CACHE[frequency][(point1, point2)]
         freq = frequency / 10**6 # switch to MHz

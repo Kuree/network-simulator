@@ -23,7 +23,7 @@ class Device:
     ''' the base class for simulation node
     '''
     def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, 
-            guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000], ptx=14):
+            guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000], ptx=14, gain=3):
         self.id = id
         self.env = env
         self.random = random.Random(seed)
@@ -38,12 +38,17 @@ class Device:
         self.lng = lng
         self.frequencies = frequencies
         self.ptx = ptx
+        self.gain = 3
+
+        self._medium_busy = []
 
         self.should_send = False
 
         self.on_receive = FunctionDelegate()
         self.MTU = MTU
         self.antenna = simpy.Resource(env, capacity=1)
+
+        self.path_loss = None # NOTE: this is used for factory when the path loss is predetermined.
 
     def is_active(self):
         return self.__is_active
@@ -89,7 +94,7 @@ class Device:
         else:
             # test the signal strength
             if packet.medium.layer is not None:
-                if packet._should_drop(self):
+                if packet._should_drop(self) or not packet._check_valid(self):
                     return # don't bother
             self.__current_packet = packet
             self._busy_time = max(self._busy_time, timestamp + duration)
@@ -151,4 +156,4 @@ class Device:
         self.env.process(self.delay())
         if len(self._medium) == 0:
             return False # if there is no medium attach to the device
-        return self._medium[medium_index][0].is_busy()
+        return self._medium[medium_index][0].is_busy(self)
