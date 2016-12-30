@@ -59,9 +59,9 @@ class PHYLayer:
         returns db
         '''
         # override the original one
-        if hasattr(point1, "path_loss"):
+        if hasattr(point1, "path_loss") and point1.path_loss is not None:
             return point1.path_loss
-        if hasattr(point2, "path_loss"):
+        if hasattr(point2, "path_loss") and point2.path_loss is not None:
             return point2.path_loss
 
         # this is free space path loss

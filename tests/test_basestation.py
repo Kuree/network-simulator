@@ -22,7 +22,7 @@ def simpy_bs(env):
     d2.send(MESSAGE2, 2 * d2.MTU)
     yield env.timeout(1.1)
     d1.send(MESSAGE2, 1 * d1.MTU)
-    assert t.is_busy() == True
+    assert t.is_busy(d1) == True
 
 
 def test_bs():

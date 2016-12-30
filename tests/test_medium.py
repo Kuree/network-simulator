@@ -24,14 +24,14 @@ def simpy_medium(env):
     # this one should be successful
     d1.send(TEST_MESSAGE1, d1.MTU)
     yield env.timeout(1.1)
-    assert t.is_busy() == False
+    assert t.is_busy(d1) == False
     d1.sleep()
     # this should be sucessful as well
     d1.send(TEST_MESSAGE2, 2 * d1.MTU)
     yield env.timeout(1.1)
-    assert t.is_busy() == True
+    assert t.is_busy(d1) == True
     yield env.timeout(1.1)
-    assert t.is_busy() == False
+    assert t.is_busy(d1) == False
     # collision
     d1.send(TEST_MESSAGE1, 2 * d1.MTU)
     yield env.timeout(1)
@@ -39,9 +39,9 @@ def simpy_medium(env):
     # collision
     d2.send(TEST_MESSAGE1, 2 * d2.MTU)
     yield env.timeout(1.1)
-    assert t.is_busy() == True
+    assert t.is_busy(d2) == True
     yield env.timeout(1.1)
-    assert t.is_busy() == False
+    assert t.is_busy(d2) == False
 
 if __name__ == "__main__":
     test_medium()
