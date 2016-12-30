@@ -56,7 +56,7 @@ class RiverSimulator(Simulator):
             for n in nodes:
                 size = random.randrange(24, 48)  # random payload size
                 n.send(dummy_payload, size)
-            sleep_time = 3 * 60 / 0.2 # each tick is 0.2 seconds # need to switch to Realistic Environment
+            sleep_time = 3 * 60 / 0.2 # each tick is 0.2 seconds TODO: switch to Realistic Environment
             yield env.timeout(sleep_time)
 
 def main():
@@ -78,8 +78,6 @@ def main():
     if args.test:
         use_seed = True
         random.seed(0)
-    else:
-        rates = [0.1 / num_nodes * i for i in range(1, 21)]
 
     sim = RiverSimulator(total_time, use_seed, protocol_type, log_prefix)
         
@@ -89,7 +87,7 @@ def main():
         if args.stdout or args.test:
             ch = logging.StreamHandler(sys.stdout)
         else:
-            ch = logging.FileHandler(os.path.join("rate_log", str(protocol_type) + "-" + name))
+            ch = logging.FileHandler(os.path.join("river_log", str(protocol_type) + "-" + name))
         ch.setFormatter(TraceFormatter())
         ch.setLevel(logging.INFO)
         logger.addHandler(ch)

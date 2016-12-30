@@ -38,13 +38,13 @@ class Device:
         self.lng = lng
         self.frequencies = frequencies
         self.ptx = ptx
-        self.gain = 3
-
-        self._medium_busy = []
+        self.gain = gain
 
         self.should_send = False
 
         self.on_receive = FunctionDelegate()
+        self.on_signal = FunctionDelegate()
+
         self.MTU = MTU
         self.antenna = simpy.Resource(env, capacity=1)
 
@@ -72,6 +72,8 @@ class Device:
         # 3. packet delay or drop the packet
         if not self.__is_active:
             return
+        # signal the on signal event
+        self.on_signal(packet)
         timestamp = packet.timestamp
 
         # compute delay
@@ -157,3 +159,13 @@ class Device:
         if len(self._medium) == 0:
             return False # if there is no medium attach to the device
         return self._medium[medium_index][0].is_busy(self)
+
+
+    def _invalidate_packet_receive(receiver):
+        def on_receive(packet):
+            # TODO:
+            # this one won't be captured by the logger
+            # needs to find another way to fixed the logger
+            if packet._check_valid(receiver):
+                packet.valid = False
+        return on_receive

@@ -1,0 +1,50 @@
+[
+{
+    "jitter_range": 0.001, 
+    "transmission_time": 0.99,
+    "rates": [30],
+    "feedback_t": 0.1,
+    "p": 0.05, 
+    "m":3, 
+    "slot_t": 0.1,
+    "guard": 0.01,
+    "N": 16, 
+	"path_loss": 104.42
+},
+{
+    "jitter_range": 0.001, 
+    "transmission_time": 0.99,
+    "rates": [30],
+    "feedback_t": 0.1,
+    "p": 0.05, 
+    "m":3, 
+    "slot_t": 0.1,
+    "guard": 0.01,
+    "N": 16, 
+	"path_loss": 116.95
+},
+{
+    "jitter_range": 0.001,
+    "transmission_time": 0.99,
+    "rates": [30],
+    "feedback_t": 0.1,
+    "p": 0.05,
+    "m":3,
+    "slot_t": 0.1,
+    "guard": 0.01,
+    "N": 16,
+	"path_loss": 103.34
+},
+{
+    "jitter_range": 0.001,
+    "transmission_time": 0.99,
+    "rates": [30],
+    "feedback_t": 0.1,
+    "p": 0.05,
+    "m":3,
+    "slot_t": 0.1,
+    "guard": 0.01,
+    "N": 16,
+	"path_loss": 103.66
+}
+]

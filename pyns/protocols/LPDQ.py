@@ -118,6 +118,7 @@ class LPDQBaseStation(Device):
 
         self.__init_slots()
         self.on_receive += self.__bs_on_receive
+        self.on_signal += Device._invalidate_packet_receive(self)
 
         self.env.process(self.run())
 

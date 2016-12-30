@@ -15,4 +15,4 @@ class ALOHANode(Device):
 class ALOHABaseStation(Device):
     def __init__(self, id, env, rates):
         super().__init__(id, env, rates)
-
+        self.on_signal += Device._invalidate_packet_receive(self)
