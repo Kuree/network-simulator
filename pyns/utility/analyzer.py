@@ -20,7 +20,7 @@ class Analyzer:
         busy_time = 0
         for packet_index in range(len(packet_data)):
             packet = packet_data[packet_index]
-            timestamp, node_id, size, duration, is_overhead = packet
+            timestamp, node_id, size, duration, is_overhead, valid = packet
             
             timestamp = float(timestamp)
             packet[0] = timestamp
@@ -35,7 +35,8 @@ class Analyzer:
             packet[3] = duration
 
             is_overhead = bool(int(is_overhead))
-            packet[4] = is_overhead
+            valid = bool(int(valid))
+            packet[4] = is_overhead or (not valid)
 
             if timestamp < busy_time:
                 # this is a collision

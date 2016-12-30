@@ -15,6 +15,7 @@ class PHYLayer:
         size is in byte
         '''
         ber = self.compute_ber(ebn0, is_log)
+        print("ber:", ber)
         return 1 - (1 - ber)**(size * 8)
 
     def get_ebn0(self, ptx, point1, point2, rate, frequency, noise_figure, gain1, gain2):
@@ -23,6 +24,7 @@ class PHYLayer:
         loss = self.get_path_loss(point1, point2, frequency)
         prx = utility.get_prx(ptx, gain1, gain2, loss)
         ebn0 = utility.get_ebn0(rate, self.bandwidth, Pn, prx)
+        print("Pn", Pn, "noise_figure", noise_figure, "ptx", ptx)
         return ebn0
 
 

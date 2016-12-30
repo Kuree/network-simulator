@@ -32,7 +32,7 @@ def parse_name(path, config):
 
 def plot(data, xscale):
     ''' plot the data points'''
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt # import here to avoid package dependency detect
     
     fig, ax = plt.subplots()
     for legend in data:
@@ -45,7 +45,7 @@ def plot(data, xscale):
         ax.plot(x, y, label=legend)
     legend = ax.legend(loc="upper left")
 
-    return ax
+    return ax, plt
 
 
 def main():
@@ -84,7 +84,7 @@ def main():
         xscale = config["xscale"]
     else:
         xscale = 1
-    ax = plot(data, xscale)
+    ax, plt = plot(data, xscale)
     ax.set_xlabel(config["xlabel"])
     ax.set_ylabel(config["ylabel"])
 

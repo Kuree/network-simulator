@@ -23,7 +23,7 @@ class Device:
     ''' the base class for simulation node
     '''
     def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, 
-            guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000], ptx=14, gain=3):
+            guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000], ptx=0.1, gain=3):
         self.id = id
         self.env = env
         self.random = random.Random(seed)

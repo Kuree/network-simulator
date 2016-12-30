@@ -28,5 +28,11 @@
     "index": 4,
     "help": "if set, the packet will not count as throughput",
     "type": "int"
+  },
+  {
+    "name": "valid",
+    "index": 5,
+    "help": "if set, the packet will not count as throughput. it is caused by path loss",
+    "type": "int"
   }
 ]

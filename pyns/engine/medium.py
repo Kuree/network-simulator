@@ -82,7 +82,7 @@ class TransmissionPacket:
         if self.medium.layer is None:
             return self.valid
         else:
-            rate = self.size / self.duration
+            rate = self.size / self.duration * 8 # bits per second
             layer = self.medium.layer
             ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate, 
                 self.frequency, self.medium.noise_figure, self.sender.gain, receiver.gain)
@@ -188,6 +188,10 @@ class TransmissionMedium:
         duration = packet.duration
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
+        self.env.process(self._received_log(packet))
+        
+    def _received_log(self, packet):
+        yield self.env.timeout(packet.duration)
         for logger in self.__loggers:
             logger.info(packet)
 
