@@ -85,9 +85,9 @@ class Device:
 
         duration = packet.duration
         if timestamp < self._busy_time:
-            packet.valid = False
-            if self.__current_packet is not None:
-                self.__current_packet.valid = False
+            # packet.valid = False
+            #if self.__current_packet is not None:
+            #    self.__current_packet.valid = False
             # signal the collision
             # TODO: fixed the signal strength collision
             self._on_collision()
@@ -166,6 +166,5 @@ class Device:
             # TODO:
             # this one won't be captured by the logger
             # needs to find another way to fixed the logger
-            if packet._check_valid(receiver):
-                packet.valid = False
+            packet.valid = packet._check_valid(receiver)
         return on_receive
