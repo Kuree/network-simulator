@@ -11,8 +11,9 @@ class SimArg(argparse.ArgumentParser):
 
         # we can add different rate to the system
         self.add_argument("--r", "--rates", action="store", dest="rate", default=[30], nargs="+", type=float, help="provide a list of available transmission date rate e.g. 20 bytes/s")
-
-        self.add_argument("-type", action="store", dest="type", required=True, type=int, help="choose which protocol to use. 0: TDMA, 1: P-CSMA, 2: LPDQ")
+        
+        # TODO: use reflection to load all protocols
+        self.add_argument("-type", action="store", dest="type", required=True, type=int, help="choose which protocol to use. 0: TDMA, 1: P-CSMA, 2: LPDQ, 3: DQN, 4: ALOHA")
         self.add_argument("-stdout", action="store_true", dest="stdout", default=False, help="if set, the logger will print the result to stdout")
     
         self.add_argument("-test", action="store_true", dest="test", default=False, help="if set, it will tell the simulator that it's a test case")
