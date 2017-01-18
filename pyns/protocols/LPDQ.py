@@ -38,9 +38,9 @@ class LPDQNode(Device):
 
         # smooth out the start up process
         self.sleep_time = 0
-        
+
         self.chosen_slot = 0
-        
+
         self.state = LPDQNode.IDLE
 
         self.on_receive += self.__node_on_receive
@@ -66,19 +66,21 @@ class LPDQNode(Device):
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
             else:
-                # TODO: this is packet loss
-                raise Exception("time", self.env.now, "id", self.id, "chosen", self.chosen_slot)
+                self.sleep_time = self.__get_next_cycle()
+                self.state = TRANSMISSION
 
+    def __get_next_cycle(self):
+        return (1 - (self.env.now % 1)) % 1
 
     def _schedule_send(self, payload, duration, size, medium_index, is_overhead, antenna):
         with antenna.request() as req:
             yield req
             self.state = LPDQNode.IN_TRANSMISSION
-            self.sleep_time = (1 - (self.env.now % 1)) % 1
+            self.sleep_time = self.__get_next_cycle()
             while self.should_send:
                 yield self.env.timeout(self.sleep_time)
                 if self.state == LPDQNode.IN_TRANSMISSION:
-                    # sleep 
+                    # sleep
                     self.chosen_slot = self.random.randrange(self.m)
                     # compute the offset for slot
                     # sleep_time
@@ -91,7 +93,7 @@ class LPDQNode(Device):
                     # this will put it to sleep till contention result is out
                     self.state = LPDQNode.WAIT
                     yield self.env.timeout(1 - (self.env.now % 1))
-                    
+
                 elif self.state == LPDQNode.DTQ:
                     # skip the slot time
                     yield self.env.timeout(self.slot_t)
@@ -111,7 +113,7 @@ class LPDQBaseStation(Device):
         self.m = m
         self.feedback_t = feedback_t
         self.slot_t = slot_t
-        
+
         self.window_size = 0.01 # 0.1 buffer
         self.dtq = 0
         self.crq = 0
@@ -133,7 +135,7 @@ class LPDQBaseStation(Device):
             slot = int(slot_raw / self.slot_t * self.m)
             if slot < self.m: # if it's larger or equal to, we don't need to take care of as it will cause packet drop
                 self.slots[slot] += 1
-       
+
     def __compute_slot(self, time):
         raw_slot = time / self.slot_t * self.m
         # notice that simple int() won't work
@@ -176,7 +178,7 @@ class LPDQBaseStation(Device):
             # decrease the counter
             self.dtq = self.dtq - 1 if self.dtq > 0 else 0
             self.crq = self.crq - 1 if self.crq > 0 else 0
-        
+
 
 
 

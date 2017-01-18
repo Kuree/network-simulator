@@ -6,7 +6,7 @@ import random
 
 class TransmissionPacket:
     """This is the class used to represent a packet sent to the medium
-    
+
     Attributes
     ----------
     timestamp: float
@@ -25,8 +25,8 @@ class TransmissionPacket:
     def __init__(self, sender, timestamp, id, payload, duration, size, medium, frequency, ptx,
             valid = True, is_overhead = False, lat = 0, lng = 0):
         """Initialize the TransmissionPacket class
-        
-        This should be used internally by the simulator. Other protocols are 
+
+        This should be used internally by the simulator. Other protocols are
         suggested to read the attributes.
 
         Parameters
@@ -54,7 +54,7 @@ class TransmissionPacket:
         self.is_overhead = is_overhead
         self.valid = valid
         self.size = size
-      
+
         # this is needed for compute ber/path loss
         self.frequency = frequency
 
@@ -84,16 +84,16 @@ class TransmissionPacket:
         else:
             rate = self.size / self.duration * 8 # bits per second
             layer = self.medium.layer
-            ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate, 
+            ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate,
                 self.frequency, self.medium.noise_figure, self.sender.gain, receiver.gain)
             per = layer.compute_per(ebn0, self.size)
-            valid = random.random() < per
+            valid = receiver.random.uniform(0, 1) < per
             return valid
 
 
 class TransmissionMedium:
     """This is the main medium that nodes transmit to.
-    
+
     TransmissionMedium is the "medium" in MAC. It is the channel that each nodes need to send
     packet to.
 
@@ -129,7 +129,7 @@ class TransmissionMedium:
         self.__current_packet = None
 
         # setup logging
-        self.__loggers = [] 
+        self.__loggers = []
 
     def add_logger(self, logger_name):
         """Adda a logger to the medium
@@ -166,13 +166,13 @@ class TransmissionMedium:
         timestamp = self.env.now + jitter
         if timestamp < 0:
             timestamp = abs(jitter)
-        self.__signal.send(TransmissionPacket(device, timestamp, device.id, payload, duration, 
+        self.__signal.send(TransmissionPacket(device, timestamp, device.id, payload, duration,
             size, self, is_overhead=is_overhead, frequency=frequency, ptx=device.ptx))
-        
-    
+
+
     def is_busy(self, device):
         """call when you need to know if the transmission is busy
-        
+
         Note
         ----
         This is used internally by the simulatior. Device class should use its class method
@@ -189,7 +189,7 @@ class TransmissionMedium:
         self.__free_time = self.env.now + duration
         self.__current_packet = packet
         self.env.process(self._received_log(packet))
-        
+
     def _received_log(self, packet):
         yield self.env.timeout(packet.duration)
         for logger in self.__loggers:

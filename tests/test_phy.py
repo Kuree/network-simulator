@@ -31,10 +31,10 @@ def test_path_loss():
 
     def on_receive1(packet):
         assert packet.id == 0
-    
+
     def on_receive2(packet):
         assert False # should not receive
-    
+
     d2.on_receive += on_receive1
 
     def sim_test():

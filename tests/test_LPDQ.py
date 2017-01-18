@@ -1,4 +1,5 @@
 from pyns.engine import TransmissionMedium
+from pyns.phy import PHYLayer
 from pyns.protocols import LPDQNode, LPDQBaseStation
 import simpy
 from pyns.utility.random_mock import RandomMock
@@ -20,7 +21,7 @@ def simpy_LPDQ(env, nodes, bs):
 
     def on_receive(packet):
         payload = packet.payload
-        id = packet.id 
+        id = packet.id
         if type(payload) == str:
             if id == 5:
                 assert abs(env.now - 1.8) < 0.1
@@ -59,8 +60,46 @@ def test_LPDQ():
         t.add_device(node)
         nodes.append(node)
     env.process(simpy_LPDQ(env, nodes, bs))
-    
+
     env.run(until=20)
+
+
+def LPDQ_path_loss(env, node, bs):
+    # the first time it will have a packet lost
+    # it will wait till next frame and try to send it
+
+    def on_receive(packet):
+        payload = packet.payload
+        id = packet.id
+        if type(payload) == str:
+            assert abs(env.now -2.8) < 0.1
+
+    bs.on_receive += on_receive
+
+    node.send("", node.MTU)
+    yield env.timeout(10)
+
+def test_LPDQ_loss():
+    env = simpy.Environment()
+    rates = [30]
+    slot_t = 0.1
+    feedback_t = 0.1
+
+    # need to set up transmission medium for this one to simulate the path loss
+    layer = PHYLayer(120, 10000, 1) # the details doesn't matter as random mock will be used here
+    t = TransmissionMedium(env, layer=layer)
+    bs = LPDQBaseStation(0, env, 0, 3, rates=rates, jitter_range = 0.0001, feedback_t = feedback_t, slot_t = slot_t)
+    t.add_device(bs)
+
+    node = LPDQNode(1, env, feedback_t = feedback_t, slot_t = slot_t, m=3, rates = rates, guard = 0.01, seed = 1, jitter_range = 0.001)
+    node.random = RandomMock([1, 2, 3])
+
+    t.add_device(node)
+
+    env.process(LPDQ_path_loss(env, node, bs))
+
+    env.run(until=10)
 
 if __name__ == "__main__":
     test_LPDQ()
+    test_LPDQ_loss()
