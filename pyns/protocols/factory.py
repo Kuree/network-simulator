@@ -3,6 +3,7 @@ from . import CSMANode, CSMABaseStation
 from . import LPDQNode, LPDQBaseStation
 from . import DQNNode, DQNBaseStation
 from . import ALOHANode, ALOHABaseStation
+from . import LORANode, LORABaseStation
 import json
 import inspect
 
@@ -12,6 +13,7 @@ class ProtocolType:
     LPDQ = 2
     DQN  = 3
     ALOHA = 4
+    LORA = 5
 
 SPECIAL_ATTRIBUTES = ["lat", "lng", "path_loss"]
 
@@ -33,9 +35,12 @@ def create_basestation(protocol_type, id, env, config, special_arg = None):
         args = __process_args(DQNBaseStation.__init__, args, special_arg)
         bs = DQNBaseStation(**args)
     elif protocol_type == ProtocolType.ALOHA:
-         args = __process_args(ALOHABaseStation.__init__, args, special_arg)
-         bs = ALOHABaseStation(**args)
-    
+        args = __process_args(ALOHABaseStation.__init__, args, special_arg)
+        bs = ALOHABaseStation(**args)
+    elif protocol_type == ProtocolType.LORA:
+        args = __process_args(LORABaseStation.__init__, args, special_arg)
+        bs = LORABaseStation(**args)
+
     for name in SPECIAL_ATTRIBUTES:
         __set_attributes(bs, config, name)
 
@@ -61,6 +66,9 @@ def create_node(protocol_type, id, env, config, special_arg = None):
     elif protocol_type == ProtocolType.ALOHA:
         args = __process_args(ALOHANode.__init__, args, special_arg)
         node = ALOHANode(**args)
+    elif protocol_type == ProtocolType.LORA:
+        args = __process_args(LORANode.__init__, args, special_arg)
+        node = LORANode(**args)
 
     for name in SPECIAL_ATTRIBUTES:
         __set_attributes(node, config, name)
@@ -74,7 +82,7 @@ def __load_config(config):
     elif type(config) == dict:
         return config
     else:
-        return {} 
+        return {}
 
 def __set_attributes(device, config, name):
     if device is not None and name in config:
@@ -89,7 +97,7 @@ def __process_args(func, args, special_arg):
     if special_arg is not None:
         for key in special_arg:
             args[key] = special_arg[key]
-    
+
     args = {k:v for k, v in args.items() if k in func_args}
     return args
 

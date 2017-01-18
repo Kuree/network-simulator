@@ -2,3 +2,4 @@ blinker==1.4
 numpy==1.11.2
 simpy==3.0.10
 scipy==0.18.1
+requests==2.12.4
