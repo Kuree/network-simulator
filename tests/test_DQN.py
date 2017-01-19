@@ -2,6 +2,7 @@ from pyns.engine import TransmissionMedium
 from pyns.protocols import DQNNode, DQNBaseStation
 import simpy
 from pyns.utility.random_mock import RandomMock
+from pyns.phy import PHYLayer
 
 def simpy_DQN(env, nodes, bs):
     # use an example close to the paper with modicication
@@ -22,7 +23,7 @@ def simpy_DQN(env, nodes, bs):
 
     def on_receive(packet):
         payload = packet.payload
-        id = packet.id 
+        id = packet.id
         if type(payload) == str:
             receive_dict[id] = env.now
     bs.on_receive += on_receive
@@ -37,6 +38,10 @@ def simpy_DQN(env, nodes, bs):
     assert abs(receive_dict[4] - 65) < 0.1
     assert abs(receive_dict[7] - 76) < 0.1
     assert abs(receive_dict[8] - 87) < 0.1
+
+
+def path_loss_DQN(env, node, bs):
+    yield env.timeout(1)
 
 def test_DQN():
     env = simpy.Environment()
@@ -58,8 +63,30 @@ def test_DQN():
         t.add_device(node)
         nodes.append(node)
     env.process(simpy_DQN(env, nodes, bs))
-    
+
+    env.run(until=150)
+
+def test_DQN_path_loss():
+    env = simpy.Environment()
+    rates = [30]
+    slot_t = 0.5
+    feedback_t = 0.5
+    N = 16
+    bs_seed = 0
+    m = 4
+
+    layer = PHYLayer(120, 10000, 1) # the details doesn't matter as random mock will be used here
+    t = TransmissionMedium(env, layer=layer)
+    bs = DQNBaseStation(0, env, N, bs_seed, m, rates=rates, jitter_range = 0.0001, feedback_t = feedback_t, slot_t = slot_t)
+    t.add_device(bs)
+    node = DQNNode(1, env, N = N, feedback_t = feedback_t, slot_t = slot_t, m=m, rates = rates, guard = 0.01, seed = 1, jitter_range = 0.001)
+    t.add_device(node)
+    node.random = RandomMock([0])
+
+    env.process(path_loss_DQN(env, node, bs))
+
     env.run(until=150)
 
 if __name__ == "__main__":
     test_DQN()
+    test_DQN_path_loss()

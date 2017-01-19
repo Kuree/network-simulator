@@ -77,8 +77,7 @@ class DQNNode(Device):
                 self.sleep_time = self.N + (payload.crq + queue_position) * (self.N + 1)
                 self.state = DQNNode.CRQ
             else:
-                self.sleep_time = self.__get_next_cycle()
-                self.state == DQNNode.IN_TRANSMISSION
+                raise Exception("node is in a corrupted state")
 
     def __get_next_cycle(self):
         return (self.total_time - (self.env.now % self.total_time)) % self.total_time
@@ -133,7 +132,9 @@ class DQNNode(Device):
                     # try to transmit again
                     self.sleep_time = (1 - (self.env.now % 1)) % 1
                     self.state = DQNNode.IN_TRANSMISSION
-
+                elif self.state == DQNNOde.WAIT:
+                    self.sleep_time = self.__get_next_cycle()
+                    self.state == DQNNode.IN_TRANSMISSION
 
 class DQNBaseStation(Device):
     def __init__(self, id, env, N, seed, m, rates, jitter_range, feedback_t, slot_t):
