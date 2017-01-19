@@ -66,8 +66,7 @@ class LPDQNode(Device):
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
             else:
-                self.sleep_time = self.__get_next_cycle()
-                self.state = TRANSMISSION
+                raise Exception("should not be in other state during transmission")
 
     def __get_next_cycle(self):
         return (1 - (self.env.now % 1)) % 1
@@ -105,7 +104,12 @@ class LPDQNode(Device):
                     # try to transmit again
                     self.sleep_time = (1 - (self.env.now % 1)) % 1
                     self.state = LPDQNode.IN_TRANSMISSION
+                elif self.state == LPDQNode.WAIT:
+                    self.sleep_time = self.__get_next_cycle()
+                    self.state = LPDQNode.IN_TRANSMISSION
 
+    def __repr__(self):
+        return "LPDQ-Node"
 
 class LPDQBaseStation(Device):
     def __init__(self, id, env, seed, m, rates, jitter_range, feedback_t, slot_t):
@@ -179,6 +183,7 @@ class LPDQBaseStation(Device):
             self.dtq = self.dtq - 1 if self.dtq > 0 else 0
             self.crq = self.crq - 1 if self.crq > 0 else 0
 
-
+    def __repr__(self):
+        return "LPDQ-BS"
 
 

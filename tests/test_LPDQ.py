@@ -90,9 +90,10 @@ def test_LPDQ_loss():
     t = TransmissionMedium(env, layer=layer)
     bs = LPDQBaseStation(0, env, 0, 3, rates=rates, jitter_range = 0.0001, feedback_t = feedback_t, slot_t = slot_t)
     t.add_device(bs)
+    bs.random = RandomMock([0])
 
     node = LPDQNode(1, env, feedback_t = feedback_t, slot_t = slot_t, m=3, rates = rates, guard = 0.01, seed = 1, jitter_range = 0.001)
-    node.random = RandomMock([1, 2, 3])
+    node.random = RandomMock([0, 1, 0])
 
     t.add_device(node)
 

@@ -87,7 +87,7 @@ class TransmissionPacket:
             ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate,
                 self.frequency, self.medium.noise_figure, self.sender.gain, receiver.gain)
             per = layer.compute_per(ebn0, self.size)
-            valid = receiver.random.uniform(0, 1) < per
+            valid = receiver.random.uniform(0, 1) > per
             return valid
 
 
