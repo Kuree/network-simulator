@@ -5,6 +5,8 @@ import numpy
 import sys
 import random
 import os
+import json
+
 
 class ConstantSimulator(Simulator):
     def __init__(self, total_time, use_seed, num_nodes, protocol_type, log_prefix):
@@ -13,7 +15,6 @@ class ConstantSimulator(Simulator):
         self.num_nodes = num_nodes
         self.protocol_type = protocol_type
         self.log_prefix = log_prefix
-
 
     def _run(self, env, pr):
         if self.use_seed:
@@ -24,16 +25,17 @@ class ConstantSimulator(Simulator):
             seeds = [random.randint(0, self.num_nodes * 1000) for i in range(self.num_nodes + 1)]
         special_args = {"seed": seeds[0]}
         name = self.log_prefix + str(pr)
+        with open("100.json") as f:
+            config = json.load(f)
         t = TransmissionMedium(env, name)
         t.add_logger(name)
-        bs = create_basestation(self.protocol_type, 0, env, "default.json", special_args)
+        bs = create_basestation(self.protocol_type, 0, env, config, special_args)
         t.add_device(bs)
-
         nodes = []
 
         for i in range(self.num_nodes):
             special_arg = {"total": self.num_nodes, "scheduled_time": i, "seed": seeds[i]}
-            n = create_node(self.protocol_type, i, env, "default.json", special_arg)
+            n = create_node(self.protocol_type, i, env, config, special_arg)
             nodes.append(n)
             t.add_device(n)
 

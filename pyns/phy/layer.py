@@ -45,7 +45,7 @@ class PHYLayer:
         if hasattr(point2, "lng"):
             lng2 = point2.lng
         else:
-            lng2 = point2[1]    
+            lng2 = point2[1]
         return (lat1, lng1), (lat2, lng2)
 
     def get_distance(self, point1, point2):
@@ -59,6 +59,10 @@ class PHYLayer:
         returns db
         '''
         # override the original one
+        if hasattr(point1, "packet_loss") and point1.packet_loss is not None:
+            return 0
+        if hasattr(point2, "packet_loss") and point2.packet_loss is not None:
+            return 0
         if hasattr(point1, "path_loss") and point1.path_loss is not None:
             return point1.path_loss
         if hasattr(point2, "path_loss") and point2.path_loss is not None:
