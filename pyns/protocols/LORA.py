@@ -47,6 +47,9 @@ class LORANode(Device):
                     # finish it up
                     self.on_receive -= receive1
 
+                # if not okay. sleep for some random time
+                yield self.env.timeout(self.random.uniform(1, 10))
+
 class LORABaseStation(Device):
     def __init__(self, id, env, rates):
         super().__init__(id, env, rates)
@@ -57,9 +60,11 @@ class LORABaseStation(Device):
     def receive_window(self):
         # wait for 1 sec
         yield self.env.timeout(5)
-        size = 1
+        size = 2
         self.send(LORAACK(), size)
 
     def lora_receive(self, packet):
         # always choose the first receive wintow
+        if packet.sender == self: # don't receive message from itself
+            return
         self.env.process(self.receive_window())
