@@ -6,8 +6,9 @@ from . import ALOHANode, ALOHABaseStation
 from . import LORANode, LORABaseStation
 import json
 import inspect
+from enum import Enum
 
-class ProtocolType:
+class ProtocolType(Enum):
     TDMA = 0
     CSMA = 1
     LPDQ = 2
@@ -22,6 +23,7 @@ def create_basestation(protocol_type, id, env, config, special_arg = None):
     args["id"] = id
     args["env"] = env
     bs = None
+    protocol_type = ProtocolType(protocol_type)
     if protocol_type == ProtocolType.TDMA:
         args = __process_args(TDMABaseStation.__init__, args, special_arg)
         bs = TDMABaseStation(**args)
@@ -51,6 +53,7 @@ def create_node(protocol_type, id, env, config, special_arg = None):
     args["id"] = id
     args["env"] = env
     node = None
+    protocol_type = ProtocolType(protocol_type)
     if protocol_type == ProtocolType.TDMA:
         args = __process_args(TDMANode.__init__, args, special_arg)
         node = TDMANode(**args)

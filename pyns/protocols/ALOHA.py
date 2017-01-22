@@ -11,7 +11,7 @@ class ALOHANode(Device):
             self._send(payload, duration, size, medium_index, is_overhead)
             self.should_send = False
 
-        
+
 class ALOHABaseStation(Device):
     def __init__(self, id, env, rates):
         super().__init__(id, env, rates)

@@ -61,10 +61,16 @@ class LORABaseStation(Device):
         # wait for 1 sec
         yield self.env.timeout(5)
         size = 2
-        self.send(LORAACK(), size)
+        if not self.is_medium_busy():
+            self.send(LORAACK(), size, is_overhead = True)
+        else:
+            yield self.env.timeout(5)
+            self.send(LORAACK(), size, is_overhead = True)
 
     def lora_receive(self, packet):
-        # always choose the first receive wintow
+        # rules for receive window:
+        #   if the channel is not busy at the first receive window, use the first one
+        #   else use the second one
         if packet.sender == self: # don't receive message from itself
             return
         self.env.process(self.receive_window())

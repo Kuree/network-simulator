@@ -22,7 +22,7 @@ class Device:
     PRECISION = 0.001
     ''' the base class for simulation node
     '''
-    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01, 
+    def __init__(self, id, env, rates, seed = 1, jitter_range = 0.01,
             guard = 0.01, MTU = 20, lat = 0, lng = 0, frequencies=[915000000], ptx=0.1, gain=3):
         self.id = id
         self.env = env
@@ -103,7 +103,7 @@ class Device:
 
             # add to event queue
             self.env.process(self.wait_to_process(packet))
-   
+
     def wait_to_process(self, packet):
         # pretending receiving the transmission
         time_to_sleep = packet.timestamp + packet.duration - self.env.now
@@ -123,7 +123,7 @@ class Device:
         # TODO: fix frequency selection
         self._medium[medium_index][1](payload, duration, size, is_overhead, self.frequencies[0])
 
-    def send(self, payload, size, medium_index = 0):
+    def send(self, payload, size, medium_index = 0, is_overhead = False):
         # TODO: fix rate
         # doing fragmentation here
         # NOTE: the actual payload won't be sliced into chunks
@@ -136,7 +136,7 @@ class Device:
             chunks.append(last_chunk)
         for chunk in chunks:
             self.should_send = True
-            args = (payload, chunk / self.rates[0], chunk, medium_index, False, self.antenna)
+            args = (payload, chunk / self.rates[0], chunk, medium_index, is_overhead, self.antenna)
             self.env.process(self._schedule_send(*args))
 
     def _compute_mtu(self, time, rate):
