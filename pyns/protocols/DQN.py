@@ -59,7 +59,7 @@ class DQNNode(Device):
             payload = packet.payload
             if type(payload) != DQNFeedback:
                 return # not valid packet
-            print("sup")
+            #print("node", self.id, "chosen slot", self.chosen_slot, "status", payload.slots[self.chosen_slot][0])
             if payload.slots[self.chosen_slot][0] == 1: # it's a successful request
                 queue_position = 0
                 for i in range(self.chosen_slot):
@@ -68,6 +68,7 @@ class DQNNode(Device):
                 raw_sleep_time = payload.dtq + queue_position
                 self.sleep_time = raw_sleep_time + raw_sleep_time // self.N # take into account the overhead block
                 self.sleep_time += 1 - (self.sleep_time + self.env.now) % 1
+                #print("node", self.id, "enter dqt", self.sleep_time)
                 self.state = DQNNode.DTQ
             elif payload.slots[self.chosen_slot][0] > 1:
                 # enter crq
@@ -76,6 +77,7 @@ class DQNNode(Device):
                     if payload.slots[i][0] > 1:
                         queue_position += 1 # compute the crq position
                 self.sleep_time = self.N + (payload.crq + queue_position) * (self.N + 1)
+                #print("node", self.id, "enter crq", self.sleep_time)
                 self.state = DQNNode.CRQ
             #else:
             #    raise Exception("node is in a corrupted state")
@@ -104,6 +106,7 @@ class DQNNode(Device):
 
                     # this will put it to sleep till contention result is out
                     self.state = DQNNode.WAIT
+                    #print("node", self.id, "send request at", self.chosen_slot, "sleep", 1 - (self.env.now % 1) )
                     yield self.env.timeout(1 - (self.env.now % 1))
 
                 elif self.state == DQNNode.DTQ:
@@ -112,6 +115,7 @@ class DQNNode(Device):
                     # TODO: fix the rate here
                     # need to send data in chunks to avoid the conflicts with the protocol overhead block
                     # also it is easier to switch to different frequency in the future.
+                    #print("node", self.id, "sending data")
                     chunk_size = self.MTU / self.N
                     last_chunk = size % chunk_size
                     chunks = [chunk_size for i in range(int(size // chunk_size))]
@@ -132,10 +136,17 @@ class DQNNode(Device):
                 elif self.state == DQNNode.CRQ:
                     # try to transmit again
                     self.sleep_time = (1 - (self.env.now % 1)) % 1
+                    #print("node", self.id, "readjust to", self.sleep_time)
                     self.state = DQNNode.IN_TRANSMISSION
                 elif self.state == DQNNode.WAIT:
-                    self.sleep_time = self.__get_next_cycle()
+                    sleep_time = self.__get_next_cycle()
+                    if sleep_time == 0:
+                        sleep_time = 0.01
+                    self.sleep_time = sleep_time
+                    #print("node", self.id, "wait again", self.sleep_time)
                     self.state == DQNNode.IN_TRANSMISSION
+                else:
+                    raise Exception("in valid state")
 
 class DQNBaseStation(Device):
     def __init__(self, id, env, N, seed, m, rates, jitter_range, feedback_t, slot_t):
@@ -200,6 +211,7 @@ class DQNBaseStation(Device):
         while True:
             duration =  self.feedback_t - self.window_size
             size = self.rates[0] * duration
+            #print("sending feedback", self.slots)
             self._send(DQNFeedback(self.slots, self.dtq, self.crq), duration, size, medium_index = 0, is_overhead = True)
 
             # increment the counter accordingly

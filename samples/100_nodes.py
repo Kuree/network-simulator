@@ -44,12 +44,13 @@ class ConstantSimulator(Simulator):
 
         rate = pr * len(nodes)
         dummy_payload = "Test"
-        load = rate if self.protocol_type != 3 else rate / config["N"]
+        ADJUST_FACTOR = 4 # this is for DQN adjustment
+        load = rate if self.protocol_type != 3 else rate / config["N"] * ADJUST_FACTOR
         while True:
             num_of_trans = numpy.random.poisson(load)
             nodes_to_trans = random.sample(nodes, num_of_trans)
             for n in nodes_to_trans:
-                n.send(dummy_payload, n.MTU)
+                n.send(dummy_payload, int(n.MTU / ADJUST_FACTOR))
             sleep_time = numpy.random.uniform(0, 2)
             yield env.timeout(sleep_time)
 
