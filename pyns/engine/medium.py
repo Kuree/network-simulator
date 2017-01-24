@@ -82,8 +82,8 @@ class TransmissionPacket:
         if self.medium.layer is None:
             return self.valid
         else:
-            if hasattr(receiver, "packet_loss"):
-                return receiver.random.uniform(0, 1) > 1 - receiver.packet_loss
+            if hasattr(receiver, "packet_loss") and receiver.packet_loss is not None:
+                return receiver.random.uniform(0, 1) > receiver.packet_loss
             rate = self.size / self.duration * 8 # bits per second
             layer = self.medium.layer
             ebn0 = layer.get_ebn0(self.ptx, self.sender, receiver, rate,

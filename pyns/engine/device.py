@@ -49,6 +49,7 @@ class Device:
         self.antenna = simpy.Resource(env, capacity=1)
 
         self.path_loss = None # NOTE: this is used for factory when the path loss is predetermined.
+        self.packet_loss = None
 
     def is_active(self):
         return self.__is_active

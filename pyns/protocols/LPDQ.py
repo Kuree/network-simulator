@@ -65,8 +65,8 @@ class LPDQNode(Device):
                         queue_position += 1 # compute the crq position
                 self.sleep_time = payload.crq + queue_position
                 self.state = LPDQNode.CRQ
-            else:
-                raise Exception("should not be in other state during transmission")
+            #else:
+                #raise Exception("should not be in other state during transmission")
 
     def __get_next_cycle(self):
         return (1 - (self.env.now % 1)) % 1
@@ -146,7 +146,8 @@ class LPDQBaseStation(Device):
         for i in range(self.m):
             if abs(raw_slot - i) < self.jitter_range * 2:
                 return i
-        raise Exception("received at wrong time!")
+        # raise Exception("received at wrong time!")
+        return self.m - 1
 
     def _on_collision(self):
         time = self.env.now % 1

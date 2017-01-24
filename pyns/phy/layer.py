@@ -60,6 +60,7 @@ class PHYLayer:
         '''
         # override the original one
         if hasattr(point1, "packet_loss") and point1.packet_loss is not None:
+            print("sup")
             return 0
         if hasattr(point2, "packet_loss") and point2.packet_loss is not None:
             return 0

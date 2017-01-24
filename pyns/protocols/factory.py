@@ -16,7 +16,7 @@ class ProtocolType(Enum):
     ALOHA = 4
     LORA = 5
 
-SPECIAL_ATTRIBUTES = ["lat", "lng", "path_loss"]
+SPECIAL_ATTRIBUTES = ["lat", "lng", "path_loss", "packet_loss"]
 
 def create_basestation(protocol_type, id, env, config, special_arg = None):
     args = __load_config(config)

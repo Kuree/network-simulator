@@ -2,10 +2,10 @@
     "jitter_range": 0.001, 
     "transmission_time": 0.99,
     "rates": [30],
-    "feedback_t": 0.1,
+    "feedback_t": 0.5,
     "p": 0.05, 
-    "m":3, 
-    "slot_t": 0.1,
+    "m":4, 
+    "slot_t": 0.5,
     "guard": 0.01,
     "N": 16, 
 	"packet_loss": 0.1

@@ -59,6 +59,7 @@ class DQNNode(Device):
             payload = packet.payload
             if type(payload) != DQNFeedback:
                 return # not valid packet
+            print("sup")
             if payload.slots[self.chosen_slot][0] == 1: # it's a successful request
                 queue_position = 0
                 for i in range(self.chosen_slot):
@@ -76,8 +77,8 @@ class DQNNode(Device):
                         queue_position += 1 # compute the crq position
                 self.sleep_time = self.N + (payload.crq + queue_position) * (self.N + 1)
                 self.state = DQNNode.CRQ
-            else:
-                raise Exception("node is in a corrupted state")
+            #else:
+            #    raise Exception("node is in a corrupted state")
 
     def __get_next_cycle(self):
         return (self.total_time - (self.env.now % self.total_time)) % self.total_time
@@ -132,7 +133,7 @@ class DQNNode(Device):
                     # try to transmit again
                     self.sleep_time = (1 - (self.env.now % 1)) % 1
                     self.state = DQNNode.IN_TRANSMISSION
-                elif self.state == DQNNOde.WAIT:
+                elif self.state == DQNNode.WAIT:
                     self.sleep_time = self.__get_next_cycle()
                     self.state == DQNNode.IN_TRANSMISSION
 
@@ -177,7 +178,8 @@ class DQNBaseStation(Device):
         for i in range(self.m):
             if abs(raw_slot - i) < self.jitter_range * 2:
                 return i
-        raise Exception("Received at wrong time at time", self.env.now)
+        #raise Exception("Received at wrong time at time", self.env.now)
+        return self.m - 1
 
     def _on_collision(self):
         time = self.env.now % (self.N + 1)

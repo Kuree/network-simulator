@@ -1,5 +1,6 @@
 from pyns.protocols import create_basestation, create_node, ProtocolType
 from pyns.engine import Simulator, SimArg, TraceFormatter, TransmissionMedium
+from pyns.phy import PHYLayer
 import logging
 import numpy
 import sys
@@ -27,7 +28,8 @@ class ConstantSimulator(Simulator):
         name = self.log_prefix + str(pr)
         with open("100.json") as f:
             config = json.load(f)
-        t = TransmissionMedium(env, name)
+        layer = PHYLayer(120, 10000, 1) # 10 KHz bandwidth. won't be used in the simulation
+        t = TransmissionMedium(env, name, layer=layer)
         t.add_logger(name)
         bs = create_basestation(self.protocol_type, 0, env, config, special_args)
         t.add_device(bs)
@@ -42,8 +44,9 @@ class ConstantSimulator(Simulator):
 
         rate = pr * len(nodes)
         dummy_payload = "Test"
+        load = rate if self.protocol_type != 3 else rate / config["N"]
         while True:
-            num_of_trans = numpy.random.poisson(rate)
+            num_of_trans = numpy.random.poisson(load)
             nodes_to_trans = random.sample(nodes, num_of_trans)
             for n in nodes_to_trans:
                 n.send(dummy_payload, n.MTU)
